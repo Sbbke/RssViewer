@@ -1,0 +1,60 @@
+.topic-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* --- Dropdown System --- */
+.dropdown {
+    width: 100%;
+}
+
+.dropdown-toggle {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.dropdown-toggle:hover {
+    background-color: var(--bg-hover);
+}
+
+.arrow {
+    font-size: 0.65rem;
+    transition: transform 0.2s ease;
+    color: var(--text-muted);
+}
+
+.arrow.up {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: #141417;
+}
+
+.dropdown-item a {
+    display: block;
+    padding: 0.5rem 1.5rem 0.5rem 2.5rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s, background 0.2s;
+}
+
+.dropdown-item a:hover {
+    color: var(--text-main);
+    background-color: var(--bg-hover);
+}
