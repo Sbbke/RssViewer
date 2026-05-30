@@ -14,10 +14,10 @@ Artificial Intelligence, specifically Machine Learning (ML), serves as the prima
 ## Source/Publisher
 The publisher for the topics can be vary, especially in industry type. 
 - Academy
--   - arxiv
+     - arxiv
 - Industry:
--   -  Techcompany's research blogs.
-    -  Indivisual publisher
+    - Corporate research blogs
+    - Individual technical publishers
 
 While academic research traditionally falls under established publishers like IEEE, SpringerLink, ScienceDirect, and ACM, much of this literature sits behind paywalls. Thanks to the open-access culture of the AI research community, arXiv provides a robust, free repository of state-of-the-art research papers.
 
@@ -30,8 +30,7 @@ Why slides? During technical briefings, slides are the standard medium for conve
 
 The goal of these generated slides is not to replace deep reading, but to act as a high-signal discovery tool. The system aims to synthesize just enough context to spark a reader's interest, allowing them to think: "I am aware of this development, I understand the problem they are solving, their proposed approach, and the potential impact. I don't know every implementation detail yet, but now I know exactly where to dig deeper if it applies to my current challenges." This design reflects a core philosophy: focusing the system on identifying actionable solutions rather than merely cataloging technical concepts.
 
-The flow chart of the artifact is illustrated as follow.
-![architecture](architecture.png)
+
 # Contribution
 
 # Related Work
