@@ -44,9 +44,8 @@ Monolithic System architecture.
 ## Format Consistency
 - Problem: Publisher content varies wildly in structure, formatting, and thematic focus.
 - Solution: This structural fuzziness will be addressed using a hybrid approach:
-
-- - Regular Expressions (Regex): For deterministic keyword and metadata extraction.
-- - Natural Language Processing (NLP): For semantic classification and thematic grouping.
+      - Regular Expressions (Regex): For deterministic keyword and metadata extraction.
+      - Natural Language Processing (NLP): For semantic classification and thematic grouping.
 
 ## Content Consistency
 - Problem: Not all digital publishers strictly adhere to or maintain standard RSS protocols, leading to broken feeds or missing data.
