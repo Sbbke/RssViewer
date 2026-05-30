@@ -43,20 +43,19 @@ Monolithic System architecture.
 
 # Expected problems and solution
 ## Format Consistency
-Problem: Publisher content varies wildly in structure, formatting, and thematic focus.
-Solution: This structural fuzziness will be addressed using a hybrid approach:
+- Problem: Publisher content varies wildly in structure, formatting, and thematic focus.
+- Solution: This structural fuzziness will be addressed using a hybrid approach:
 
-Regular Expressions (Regex): For deterministic keyword and metadata extraction.
-
-Natural Language Processing (NLP): For semantic classification and thematic grouping.
+- - Regular Expressions (Regex): For deterministic keyword and metadata extraction.
+- - Natural Language Processing (NLP): For semantic classification and thematic grouping.
 
 ## Content Consistency
-Problem: Not all digital publishers strictly adhere to or maintain standard RSS protocols, leading to broken feeds or missing data.
-Solution: The system will utilize a modular architecture, featuring decoupled, platform-specific formatters tailored to scrape and normalize data from non-standard platforms.
+- Problem: Not all digital publishers strictly adhere to or maintain standard RSS protocols, leading to broken feeds or missing data.
+- Solution: The system will utilize a modular architecture, featuring decoupled, platform-specific formatters tailored to scrape and normalize data from non-standard platforms.
 
 ## LLM 
-Problem: Unlike specialized cloud services (e.g., NotebookLM), local small language models (SLMs) often struggle with complex structured outputs and presentation formatting.
-Solution: The system will implement a "hot-swappable" inference architecture. This allows users to seamlessly toggle between local SLMs and cloud-based APIs depending on their compute availability, though the core development focus will remain on maintaining a private, local-first environment.
+- Problem: Unlike specialized cloud services (e.g., NotebookLM), local small language models (SLMs) often struggle with complex structured outputs and presentation formatting.
+- Solution: The system will implement a "hot-swappable" inference architecture. This allows users to seamlessly toggle between local SLMs and cloud-based APIs depending on their compute availability, though the core development focus will remain on maintaining a private, local-first environment.
 
 # Expected results
 A complete, end-to-end system capable of actively gathering news from academic and industry publishers, synthesizing disparate data points, and presenting clear, structured insights to the user across various formats (including automated slide decks).
