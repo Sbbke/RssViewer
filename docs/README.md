@@ -38,7 +38,7 @@ The goal of these generated slides is not to replace deep reading, but to act as
 # Methodology
 Monolithic System architecture.
 
-Golang + Wails (webui) + React Typescript
+Golang + Wails (webui) with React Typescript
 
 ## Subscriber
 ## Parser
