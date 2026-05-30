@@ -37,6 +37,9 @@ The goal of these generated slides is not to replace deep reading, but to act as
 [Feedify](https://feedify.net/)
 # Methodology
 Monolithic System architecture.
+
+Golang + Wails (webui) + React Typescript
+
 ## Subscriber
 ## Parser
 
