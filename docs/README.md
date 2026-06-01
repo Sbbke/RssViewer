@@ -15,7 +15,12 @@ The system aims to synthesize just enough context to spark a reader's interest, 
 
 
 # Related Work
-[Feedify](https://feedify.net/)
+## RSS viewer
+While platforms such as [Feedify](https://feedify.net/) excel at centralizing raw content, they lack the semantic intelligence required to synthesize cross-platform information or evaluate technical impact. 
+
+## Data synthesis service
+specialized cloud services (e.g., Google’s NotebookLM) offer advanced data synthesis but demand reliance on proprietary, cloud-hosted infrastructure, raising privacy and data-handling concerns.
+
 # Methodology
  
 Monolithic System architecture, developed through Golang + Wails (webui) with React Typescript. 
