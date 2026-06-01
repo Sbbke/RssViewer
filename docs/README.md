@@ -6,7 +6,7 @@ With the rapid acceleration of information driven by the evolution of Large Lang
 # Background
 
 # Goal
-The primary objective of this project is to develop a software platform prioritize flexibility and scalability, provide functionalities of aggregating information from diverse publishers and automatically synthesize the findings into a structured briefing. 
+The primary objective of this project is to develop a software platform that prioritizes flexibility and scalability, providing robust functionalities to aggregate information from diverse publishers and automatically synthesize the findings into a structured briefing.
 
 # Contribution
 The system aims to synthesize just enough context to spark a reader's interest, providing immediate clarity on the problem being solved, the proposed approach, and its potential impact. Rather than drowning the user in implementation details, the artifact serves to answer a fundamental question: "Does this development apply to my current technical challenges, and is it worth deeper investigation?" This design reflects a core philosophy: focusing the system on extracting actionable solutions rather than merely cataloging raw technical concepts. Consequently, the slide deck is treated as one effective medium of representation; the underlying architecture is designed to easily extend or adapt to any other data representation format that facilitates this high-signal discovery goal.
