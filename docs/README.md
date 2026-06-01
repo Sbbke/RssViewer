@@ -1,12 +1,26 @@
 # Abstract
-With the rapid acceleration of information driven by the evolution of Large Language Models (LLMs), keeping pace with pioneering technologies has become increasingly difficult. While Really Simple Syndication (RSS) was developed to aggregate updates, synthesizing meaningful insights from disparate sources remains a daunting task. This project explores the feasibility of leveraging local Small Language Models (SLMs) to perform automated data crawling, synthesis, and structured technical illustration.
+With the rapid acceleration of information driven by the evolution of Large Language Models (LLMs), keeping pace with pioneering technologies has become increasingly difficult. While individual publishers gather information and post news on social media or blogs, synthesizing meaningful insights from these disparate sources manually remains a daunting task, especially as language models continue to evolve in their text-to-text and text-to-image capabilities, opening up new possibilities for workflows that automate data aggregation and representation. This project will develop a platform to subscribe to and manage topic publishers with the ability to synthesize data, while exploring the feasibility of leveraging local Small Language Models (SLMs) to perform automated data crawling, synthesis, and structured technical illustration.
 
 # Introduction 
 
 # Background
 
 # Goal
-The primary objective of this project is to aggregate information from diverse publishers within a specific technical domain and automatically synthesize the findings into a structured technical briefing slide deck.
+The primary objective of this project is to aggregate information from diverse publishers and automatically synthesize the findings into a structured briefing slide deck. The goal of these generated slides is not to replace deep reading, but to act as a high-signal discovery tool.
+
+The system aims to synthesize just enough context to spark a reader's interest, providing immediate clarity on the problem being solved, the proposed approach, and its potential impact. Rather than drowning the user in implementation details, the artifact serves to answer a fundamental question: "Does this development apply to my current technical challenges, and is it worth deeper investigation?" This design reflects a core philosophy: focusing the system on extracting actionable solutions rather than merely cataloging raw technical concepts. Consequently, the slide deck is treated as one effective medium of representation; the underlying architecture is designed to easily extend or adapt to any other data representation format that facilitates this high-signal discovery goal.
+
+# Contribution
+
+
+
+# Related Work
+[Feedify](https://feedify.net/)
+# Methodology
+ 
+Monolithic System architecture, developed through Golang + Wails (webui) with React Typescript. 
+
+The system should be designed in a way focusing flexibility and scalablity. The following section will give an example scenario of system usage on specific domain.
 
 ## Topic
 Artificial Intelligence, specifically Machine Learning (ML), serves as the primary target domain for this project. The publishers in this space can be broadly categorized into two types: academia and industry. These two spheres exhibit distinct characteristics in their technical depth, focus, and contributions to state-of-the-art AI technology.
@@ -28,20 +42,6 @@ The core feature of this system is its ability to synthesize cross-platform info
 
 Why slides? During technical briefings, slides are the standard medium for conveying complex data. Breaking down technical insights into structured, visual layers makes information significantly easier to digest and follow compared to dense, plain text.
 
-The goal of these generated slides is not to replace deep reading, but to act as a high-signal discovery tool. The system aims to synthesize just enough context to spark a reader's interest, allowing them to think: "I am aware of this development, I understand the problem they are solving, their proposed approach, and the potential impact. I don't know every implementation detail yet, but now I know exactly where to dig deeper if it applies to my current challenges." This design reflects a core philosophy: focusing the system on identifying actionable solutions rather than merely cataloging technical concepts.
-
-
-# Contribution
-
-# Related Work
-[Feedify](https://feedify.net/)
-# Methodology
-Monolithic System architecture.
-
-Golang + Wails (webui) with React Typescript
-
-## Subscriber
-## Parser
 
 # Expected problems and solution
 ## Format Consistency
@@ -54,8 +54,8 @@ Golang + Wails (webui) with React Typescript
 - Problem: Not all digital publishers strictly adhere to or maintain standard RSS protocols, leading to broken feeds or missing data.
 - Solution: The system will utilize a modular architecture, featuring decoupled, platform-specific formatters tailored to scrape and normalize data from non-standard platforms.
 
-## LLM 
-- Problem: Unlike specialized cloud services (e.g., NotebookLM), local small language models (SLMs) often struggle with complex structured outputs and presentation formatting.
+## Language Model
+- Problem: Language model capabilities in data systhesis and represendation varies, for example, unlike specialized cloud services (e.g., NotebookLM), local small language models (SLMs) could struggle with complex structured outputs and presentation formatting.
 - Solution: The system will implement a "hot-swappable" inference architecture. This allows users to seamlessly toggle between local SLMs and cloud-based APIs depending on their compute availability, though the core development focus will remain on maintaining a private, local-first environment.
 
 # Expected results
