@@ -6,12 +6,10 @@ With the rapid acceleration of information driven by the evolution of Large Lang
 # Background
 
 # Goal
-The primary objective of this project is to aggregate information from diverse publishers and automatically synthesize the findings into a structured briefing slide deck. The goal of these generated slides is not to replace deep reading, but to act as a high-signal discovery tool.
-
-The system aims to synthesize just enough context to spark a reader's interest, providing immediate clarity on the problem being solved, the proposed approach, and its potential impact. Rather than drowning the user in implementation details, the artifact serves to answer a fundamental question: "Does this development apply to my current technical challenges, and is it worth deeper investigation?" This design reflects a core philosophy: focusing the system on extracting actionable solutions rather than merely cataloging raw technical concepts. Consequently, the slide deck is treated as one effective medium of representation; the underlying architecture is designed to easily extend or adapt to any other data representation format that facilitates this high-signal discovery goal.
+The primary objective of this project is to develop ensure a software platform prioritize flexibility and scalability, provide functionalities of aggregating information from diverse publishers and automatically synthesize the findings into a structured briefing. 
 
 # Contribution
-
+The system aims to synthesize just enough context to spark a reader's interest, providing immediate clarity on the problem being solved, the proposed approach, and its potential impact. Rather than drowning the user in implementation details, the artifact serves to answer a fundamental question: "Does this development apply to my current technical challenges, and is it worth deeper investigation?" This design reflects a core philosophy: focusing the system on extracting actionable solutions rather than merely cataloging raw technical concepts. Consequently, the slide deck is treated as one effective medium of representation; the underlying architecture is designed to easily extend or adapt to any other data representation format that facilitates this high-signal discovery goal.
 
 
 # Related Work
@@ -23,7 +21,7 @@ specialized cloud services (e.g., Google’s NotebookLM) offer advanced data syn
 
 # Methodology
  
-Monolithic System architecture, developed through Golang + Wails (webui) with React Typescript. 
+The platform utilizes a Monolithic System Architecture, developed using Golang for high-performance backend systems programming and data processing, paired with Wails and React TypeScript for a lightweight, native cross-platform web UI.
 
 The system should be designed in a way focusing flexibility and scalablity. The following section will give an example scenario of system usage on specific domain.
 
