@@ -8,10 +8,33 @@ This is a ducument for describing system architecture in a structred way in natu
 - **Rss Feed** <br>
 The local disk is strictly an asset cache holding the raw, untouched .xml payload exactly as it was fetched from the publisher's server.
 
-- **Summary** <br>
-have two types of summary: raw text and images slide.
 - **Post Content** <br>
 Processed content from html of a post.
+
+- **Summary** <br>
+have two types of summary: raw text and images slide.
+
+```bash
+/
+├── rss/
+│   └── {rss_id}/
+|       ├── rss.xml 
+│       ├── {post_id}.txt
+│       └── {post_id}.html
+└── summary/
+    ├── topic/
+    │   └── {topic_id}_{composite_rss_hash}/
+    │       ├── summary.txt
+    │       └── slide/
+    │           ├── 1.png
+    │           └── 2.png
+    └── post/
+        └── {post_id}/
+            ├── summary.txt
+            └── slide/
+                ├── 1.png
+                └── 2.png
+```
 
 ### DB schema
 
