@@ -100,11 +100,31 @@ CQRS
 SQLite handles concurrent reads brilliantly, but it only allows one single write operation at a time (it locks the database file). The automated scrapers might try to write newly crawled post pointers or summaries concurrently.
 
 ### Orchestrator
+Manage goroutine for data manipulation.
 - DBReader <br>
 Dedicated to Read operation
 > Services can request a reader for read operation
 - DBWriter <br>
 Implement basic CUD operation to 1.DB, and 2. Local Disk.
 > Channel all write operations through a single Go worker goroutine to prevent "database is locked" (SQLITE_BUSY) errors.
+
+### DB
+
+### Local
+Since every modification will go through db layer first (checking duplication, fetching essential data such as ID and title ...etc.), so implment fairly simple local file manipulation (CURD).
+
+All path is initialized as the operation executed (if not exist) as defined above.
+
+- CreateRss() : <br>
+Save rss.xml file to the folder with given ID and Content.
+- CreatePostSummary() : <br>
+Save Post summary to the folder with given post.ID and summary.
+- CreateTopicSummary() : <br>
+Save Topic raw text summary to the folder with given topic.ID, related rss.ID and summary.
+- CreateTopicSlide() : <br>
+Save Topic raw image slide file to the folder with given topic.ID, related rss.ID and summary.
+
+- For every Update operation, call Delete operation to remove target endpoint(rss, post summary, topic summary, or topic slide) then call Create operations.
+
 
 
