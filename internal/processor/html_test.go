@@ -1,8 +1,10 @@
 package processor
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 )
 
@@ -41,3 +43,32 @@ func TestHtml_ServerError(t *testing.T) {
 		t.Fatal("expected an error due to 500 Status Code, but got nil")
 	}
 }
+
+func TestCleanHtml(t *testing.T) {
+	rawHtml := "<html><header>some header</header><body>Hello World!</body><footer>some footer</footer></html><script>here is some script</script>"			
+	
+	expected := "Hello World!"
+
+	hp := NewHtmlProcessor()
+	result, err := hp.CleanHTML(rawHtml)
+	if err !=nil{
+		t.Fatalf("something went wrong")
+	}
+
+	if result != expected{
+		t.Fatalf("Did not process html correctly")
+	}
+
+	filepath := "/home/user/RssViewer/test/post1.html"
+	file, err := os.ReadFile(filepath)
+	if err != nil{
+		t.Fatalf("error reading test html")
+	}
+	content, err := hp.CleanHTMLToMarkdown(string(file))
+	if err != nil{
+		t.Fatalf("error processing test html")
+	}
+
+	fmt.Println(content)
+}
+

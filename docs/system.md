@@ -91,12 +91,20 @@ Actively check the posts, compare it to the rss, if there is an update then re-r
 ### RssProcessor
 
 ### HtmlProcessor
-
+The processor is responsible for parse the raw html file to raw text to reduce the token size for generating summary.
+- Flexibility: <br>
+The raw html come from different sources, each have their own naming of html element class, to process the html into much more precise and accurate content (without too much noise content, such as ads, extra links, dupilicate title ... etc.), the html processor should implement different parsing policy to identified html source.
 
 ## datalayer 
 CQRS
 SQLite handles concurrent reads brilliantly, but it only allows one single write operation at a time (it locks the database file). The automated scrapers might try to write newly crawled post pointers or summaries concurrently.
 
-The Fix: Ensure DBWriter is backed by a single connection pool configured with a busy timeout, or channel all write operations through a single Go worker goroutine to prevent "database is locked" (SQLITE_BUSY) errors.
-- DBReader
-- DBWriter
+### Orchestrator
+- DBReader <br>
+Dedicated to Read operation
+> Services can request a reader for read operation
+- DBWriter <br>
+Implement basic CUD operation to 1.DB, and 2. Local Disk.
+> Channel all write operations through a single Go worker goroutine to prevent "database is locked" (SQLITE_BUSY) errors.
+
+
