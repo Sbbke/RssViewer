@@ -1,21 +1,17 @@
-package storage
+package writer
 
-
-type DBWriter struct{
+type DBWriter struct {
 }
 
-func (w *DBWriter) Create() error{
-	
+func (w *DBWriter) Create() error {
+
 	return nil
 }
 
-func (w *DBWriter) Update() error{
+func (w *DBWriter) Update() error {
 	return nil
 }
 
-func (w *DBWriter) Delete() error{
+func (w *DBWriter) Delete() error {
 	return nil
 }
-
-
-

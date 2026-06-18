@@ -1,4 +1,4 @@
-package storage
+package writer
 
 import (
 	"fmt"
@@ -263,50 +263,51 @@ func (w *LocalWriter) atomicWrite(path string, content []byte) error {
 // Helper to atomically swap asset slide directories
 func (w *LocalWriter) atomicDirSwap(path string, images [][]byte) error {
 
-	closed := false
-	renamed := false
-	dir := filepath.Dir(path)
-	tmp, err := os.CreateTemp(dir, ".tmp-*")
-	if err != nil {
-		return fmt.Errorf("failed to create temp file: %w", err)
+	// targetPath represents the final destination directory (e.g., "storage/slides/topic_1")
+	parentDir := filepath.Dir(path)
+
+	// Ensure the parent directory exists before creating a temp directory inside it
+	if err := os.MkdirAll(parentDir, 0755); err != nil {
+		return fmt.Errorf("failed to create parent directory structure: %w", err)
 	}
-	tmpPath := tmp.Name()
+
+	// Create a secure temporary directory in the same filesystem partition to ensure atomic renaming
+	tmpDir, err := os.MkdirTemp(parentDir, ".tmp-assets-*")
+	if err != nil {
+		return fmt.Errorf("failed to create temporary directory: %w", err)
+	}
+
+	swapped := false
+	// Deferred safety cleanup loop
 	defer func() {
-		if !closed {
-			if err := tmp.Close(); err != nil {
-				log.Printf("failed to close tmp file securely: %v", err)
-			}
-		}
-		if !renamed {
-			if err := os.Remove(tmpPath); err != nil {
-				log.Printf("faild to remove path: %v", err)
+		if !swapped {
+			if removeErr := os.RemoveAll(tmpDir); removeErr != nil {
+				log.Printf("critical: failed to clean up temporary directory %s: %v", tmpDir, removeErr)
 			}
 		}
 	}()
 
+	// Write individual payload images sequentially into the temp folder boundary
 	for i, img := range images {
-		fp := filepath.Join(tmpPath, fmt.Sprintf("%d.png", i))
-		if err := os.WriteFile(fp, img, 0600); err != nil {
-			if err := os.RemoveAll(tmpPath); err != nil {
-				log.Printf("error removing path :%v", err)
-			}
-			return fmt.Errorf("failed to write slide image: %w", err)
+		filename := fmt.Sprintf("%d.png", i)
+		filePath := filepath.Join(tmpDir, filename)
+
+		if err := os.WriteFile(filePath, img, 0600); err != nil {
+			return fmt.Errorf("failed to write individual slide asset %s: %w", filename, err)
 		}
 	}
 
-	if err = tmp.Sync(); err != nil {
-		return fmt.Errorf("failed to sync temp file: %w", err)
+	// Remove the stale target directory if it exists to allow a clean folder overwrite
+	if err := os.RemoveAll(path); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to remove existing target asset directory: %w", err)
 	}
 
-	if err = tmp.Close(); err != nil {
-		return fmt.Errorf("failed to close temp file: %w", err)
+	// Execute the POSIX atomic rename migration
+	if err := os.Rename(tmpDir, path); err != nil {
+		return fmt.Errorf("failed to atomically swap directory to target destination: %w", err)
 	}
-	closed = true
 
-	if err = os.Rename(tmpPath, path); err != nil {
-		return fmt.Errorf("failed to rename temp file to target: %w", err)
-	}
-	renamed = true
+	swapped = true
 	return nil
 
 }
