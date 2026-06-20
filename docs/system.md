@@ -1,7 +1,8 @@
 # System Architecture
 This is a ducument for describing system architecture in a structred way in natural language. NOT a software document, the detailed document for software development should be document in other file, such as API document, software specification, flow chart, class diagram, ... etc.
 
-
+The system is devided into Three layer: Frontent (UI/Client) Layer, Service Layer and Data Layer.
+Frontend communicate with backend through Service Layer, then Service Layer interact with data through Data Layer.
 ## Data Objects Design
 ### Local Storage  
 
@@ -38,11 +39,101 @@ have two types of summary: raw text and images slide.
 
 ### DB schema
 
+// TopicModel represents the "Topic" table entity
+type TopicModel struct {
+	ID        int64     `db:"id"`
+	Name      string    `db:"name"`
+	CreatedAt time.Time `db:"created_at"`	
+}
+
+// RSSModel represents the "RSS" table entity
+type RSSModel struct {
+	ID        int64     `db:"id"`
+	TopicID	  int64	    `db:"topic_id"` // Foreign Key -> TopicModel.ID
+	Title     string    `db:"title"`
+	Url       string    `db:"url"` // The raw XML feed source URL
+	CreatedAt time.Time `db:"created_at"`	
+}
+
+
+// PostModel represents the "Post" table entity pointer
+type PostModel struct {
+	ID        int64     `db:"id"`
+	RssID	  int64     `db:"source_id"` // Foreign Key -> RSSModel.ID
+	Title     string    `db:"title"`
+	Url       string    `db:"url"` // The unique target website landing page
+	CreatedAt time.Time `db:"created_at"`	
+	PublishedAt time.Time `db:"published_at"`
+}
+
 ### DTO
+
 Creat both hydrated and id-reference dto object.
 
-## Services
+type BriefingSlideResponse struct {
+	Slides    []string  `json:"slides"` // Generated asset paths
+	CreatedAt time.Time `json:"createdAt"`
+}
 
+type BriefingTextResponse struct {
+	Body      string    `json:"body"`
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+type TopicAllInOne struct {
+    TopicID   int64               `json:"topicId"`
+    Rss       []RssDetailResponse `json:"rss"`
+    Summary   *BriefingTextResponse `json:"summary"`
+    Slide     *BriefingSlideResponse `json:"slide"`
+    CreatedAt time.Time           `json:"createdAt"`
+}
+
+type TopicResponse struct {
+	TopicID   int64                 `json:"topicId"`
+	Rss       []RssItem      `json:"rss"`
+	Summary   *BriefingTextResponse `json:"summary"`   // Inline pointer: nil means "not generated yet"
+	SummaryID int64                 `json:"summaryId"` 
+	CreatedAt time.Time             `json:"createdAt"`
+}
+
+type RssItem struct {
+	ID           int64     `json:"id"`
+	Title        string    `json:"title"`
+	SubscribedAt time.Time `json:"subscribedAt"`
+}
+
+type RssResponse struct {
+	Info  RssItem    `json:"info"`  
+	Posts []PostItem `json:"posts"`
+}
+
+type RssDetailResponse struct{
+	Info RssItem
+	Posts []PostDetailResponse
+}
+
+type PostItem struct {
+	ID          int64     `json:"id"`
+	Title       string    `json:"title"`
+	PublishedAt time.Time `json:"publishedAt"`
+}
+
+type PostSummaryResponse struct {
+	Meta    PostItem             `json:"meta"`
+	Summary *BriefingTextResponse `json:"summary"`
+}
+
+type PostDetailResponse struct {
+    ID          int64                 `json:"id"`
+    Title       string                `json:"title"`
+    PublishedAt time.Time             `json:"publishedAt"`
+    Content     string                `json:"content"`
+    Summary     *BriefingTextResponse `json:"summary,omitempty"`
+    Slide       *BriefingSlideResponse `json:"slide,omitempty"`
+}
+# Service Layer
+
+## Services
 ### summary 
 Separating retrieval (GetBriefing) from computational processing (GenerateBriefing), and seperate briefing from atom response to avoid huge chunk of data transfer
 
@@ -95,11 +186,11 @@ The processor is responsible for parse the raw html file to raw text to reduce t
 - Flexibility: <br>
 The raw html come from different sources, each have their own naming of html element class, to process the html into much more precise and accurate content (without too much noise content, such as ads, extra links, dupilicate title ... etc.), the html processor should implement different parsing policy to identified html source.
 
-## datalayer 
+# datalayer 
 CQRS
 SQLite handles concurrent reads brilliantly, but it only allows one single write operation at a time (it locks the database file). The automated scrapers might try to write newly crawled post pointers or summaries concurrently.
 
-### Orchestrator
+## Orchestrator
 Manage goroutine for data manipulation.
 - DBReader <br>
 Dedicated to Read operation
@@ -108,6 +199,7 @@ Dedicated to Read operation
 Implement basic CUD operation to 1.DB, and 2. Local Disk.
 > Channel all write operations through a single Go worker goroutine to prevent "database is locked" (SQLITE_BUSY) errors.
 
+## CQRS
 ### DB
 
 ### Local
