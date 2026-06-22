@@ -38,99 +38,8 @@ have two types of summary: raw text and images slide.
 ```
 
 ### DB schema
-
-// TopicModel represents the "Topic" table entity
-type TopicModel struct {
-	ID        int64     `db:"id"`
-	Name      string    `db:"name"`
-	CreatedAt time.Time `db:"created_at"`	
-}
-
-// RSSModel represents the "RSS" table entity
-type RSSModel struct {
-	ID        int64     `db:"id"`
-	TopicID	  int64	    `db:"topic_id"` // Foreign Key -> TopicModel.ID
-	Title     string    `db:"title"`
-	Url       string    `db:"url"` // The raw XML feed source URL
-	CreatedAt time.Time `db:"created_at"`	
-}
-
-
-// PostModel represents the "Post" table entity pointer
-type PostModel struct {
-	ID        int64     `db:"id"`
-	RssID	  int64     `db:"source_id"` // Foreign Key -> RSSModel.ID
-	Title     string    `db:"title"`
-	Url       string    `db:"url"` // The unique target website landing page
-	CreatedAt time.Time `db:"created_at"`	
-	PublishedAt time.Time `db:"published_at"`
-}
-
 ### DTO
 
-Creat both hydrated and id-reference dto object.
-
-type BriefingSlideResponse struct {
-	Slides    []string  `json:"slides"` // Generated asset paths
-	CreatedAt time.Time `json:"createdAt"`
-}
-
-type BriefingTextResponse struct {
-	Body      string    `json:"body"`
-	CreatedAt time.Time `json:"createdAt"`
-}
-
-type TopicAllInOne struct {
-    TopicID   int64               `json:"topicId"`
-    Rss       []RssDetailResponse `json:"rss"`
-    Summary   *BriefingTextResponse `json:"summary"`
-    Slide     *BriefingSlideResponse `json:"slide"`
-    CreatedAt time.Time           `json:"createdAt"`
-}
-
-type TopicResponse struct {
-	TopicID   int64                 `json:"topicId"`
-	Rss       []RssItem      `json:"rss"`
-	Summary   *BriefingTextResponse `json:"summary"`   // Inline pointer: nil means "not generated yet"
-	SummaryID int64                 `json:"summaryId"` 
-	CreatedAt time.Time             `json:"createdAt"`
-}
-
-type RssItem struct {
-	ID           int64     `json:"id"`
-	Title        string    `json:"title"`
-	SubscribedAt time.Time `json:"subscribedAt"`
-}
-
-type RssResponse struct {
-	Info  RssItem    `json:"info"`  
-	Posts []PostItem `json:"posts"`
-}
-
-type RssDetailResponse struct{
-	Info RssItem
-	Posts []PostDetailResponse
-}
-
-type PostItem struct {
-	ID          int64     `json:"id"`
-	Title       string    `json:"title"`
-	PublishedAt time.Time `json:"publishedAt"`
-}
-
-type PostSummaryResponse struct {
-	Meta    PostItem             `json:"meta"`
-	Summary *BriefingTextResponse `json:"summary"`
-}
-
-type PostDetailResponse struct {
-    ID          int64                 `json:"id"`
-    Title       string                `json:"title"`
-    PublishedAt time.Time             `json:"publishedAt"`
-    Content     string                `json:"content"`
-    Summary     *BriefingTextResponse `json:"summary,omitempty"`
-    Slide       *BriefingSlideResponse `json:"slide,omitempty"`
-}
 # Service Layer
 
 ## Services
@@ -201,6 +110,7 @@ Implement basic CUD operation to 1.DB, and 2. Local Disk.
 
 ## CQRS
 ### DB
+single-source DTOs are assembled in the reader; multi-source DTOs are assembled in the service.
 
 ### Local
 Since every modification will go through db layer first (checking duplication, fetching essential data such as ID and title ...etc.), so implment fairly simple local file manipulation (CURD).
