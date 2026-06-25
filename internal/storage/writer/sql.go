@@ -1,160 +1,152 @@
 package writer
 
 import (
-	"RssViewer/internal/db"
 	"database/sql"
 	"fmt"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	"RssViewer/internal/dto"
+	"RssViewer/internal/model"
 )
 
 type DBWriter struct {
 	db *sql.DB
 }
 
-func NewDBwriter(db *sql.DB) (*DBWriter, error) {
-	if db == nil {
+func NewDBWriter(database *sql.DB) (*DBWriter, error) {
+	if database == nil {
 		return nil, fmt.Errorf("db cannot be nil")
 	}
-	return &DBWriter{db: db}, nil
+	return &DBWriter{db: database}, nil
 }
 
-func (w *DBWriter) CreateTopic(model *db.TopicModel) error {
-	const q = `
-		INSERT INTO topic (name, created_at)
-		VALUES (?,?)
-	`
-	res, err := w.db.Exec(q, model.Name, model.CreatedAt)
+// ---------------------------------------------------------------------------
+// Topic
+// ---------------------------------------------------------------------------
+
+func (w *DBWriter) CreateTopic(payload dto.TopicPayload) (dto.MutationResult, error) {
+	m := topicPayloadToModel(payload)
+
+	const q = `INSERT INTO topic (name, created_at) VALUES (?, ?)`
+	res, err := w.db.Exec(q, m.Name, m.CreatedAt)
 	if err != nil {
-		return fmt.Errorf("CreateTopic: %w", err)
+		return dto.MutationResult{}, fmt.Errorf("CreateTopic: %w", err)
 	}
 	id, err := res.LastInsertId()
 	if err != nil {
-		return fmt.Errorf("CreateTopic: retrieve id: %w", err)
+		return dto.MutationResult{}, fmt.Errorf("CreateTopic: retrieve id: %w", err)
 	}
-	model.ID = id
-	return nil
+	return dto.MutationResult{GeneratedID: id}, nil
 }
-func (w *DBWriter) UpdateTopic(model *db.TopicModel) error {
-	const q = `
-		UPDATE topic
-		SET    name = ?
-		WHERE  id   = ?
-	`
-	res, err := w.db.Exec(q, model.Name, model.ID)
+
+func (w *DBWriter) UpdateTopic(id int64, payload dto.TopicPayload) error {
+	const q = `UPDATE topic SET name = ? WHERE id = ?`
+	res, err := w.db.Exec(q, payload.Name, id)
 	if err != nil {
 		return fmt.Errorf("UpdateTopic: %w", err)
 	}
-	return requireOneRow(res, "UpdateTopic", model.ID)
+	return requireOneRow(res, "UpdateTopic", id)
 }
 
 func (w *DBWriter) DeleteTopic(id int64) error {
 	const q = `DELETE FROM topic WHERE id = ?`
 	res, err := w.db.Exec(q, id)
 	if err != nil {
-		return fmt.Errorf("delete topic: %w", err)
+		return fmt.Errorf("DeleteTopic: %w", err)
 	}
-
 	return requireOneRow(res, "DeleteTopic", id)
 }
 
-func (w *DBWriter) CreateRss(model *db.RSSModel) error {
-	const q = `
-		INSERT INTO rss (topic_id, title, url, created_at)
-		VALUES (?,?,?,?)
-		`
-	res, err := w.db.Exec(q, model.TopicID, model.Title, model.Url, model.CreatedAt)
-	if err != nil {
-		return fmt.Errorf("create rss: %w", err)
-	}
+// ---------------------------------------------------------------------------
+// RSS
+// ---------------------------------------------------------------------------
 
+func (w *DBWriter) CreateRss(payload dto.RssPayload) (dto.MutationResult, error) {
+	m := rssPayloadToModel(payload)
+
+	const q = `INSERT INTO rss (topic_id, title, url, created_at) VALUES (?, ?, ?, ?)`
+	res, err := w.db.Exec(q, m.TopicID, m.Title, m.Url, m.CreatedAt)
+	if err != nil {
+		return dto.MutationResult{}, fmt.Errorf("CreateRss: %w", err)
+	}
 	id, err := res.LastInsertId()
 	if err != nil {
-		return fmt.Errorf("create rss: retrieve id: %w", err)
+		return dto.MutationResult{}, fmt.Errorf("CreateRss: retrieve id: %w", err)
 	}
-
-	model.ID = id
-
-	return nil
+	return dto.MutationResult{GeneratedID: id}, nil
 }
 
-func (w *DBWriter) UpdateRss(model *db.RSSModel) error {
-	const q = `
-		UPDATE rss
-		SET title = ?
-		    url = ?
-		WHERE id = ?
-		`
-
-	res, err := w.db.Exec(q, model.Title, model.Url, model.ID)
+func (w *DBWriter) UpdateRss(id int64, payload dto.RssPayload) error {
+	// NOTE: original query was missing a comma between the SET assignments.
+	// SET title = ?, url = ? is required; SET title = ? url = ? is a syntax error.
+	const q = `UPDATE rss SET title = ?, url = ? WHERE id = ?`
+	res, err := w.db.Exec(q, payload.Title, payload.Url, id)
 	if err != nil {
-		return fmt.Errorf("update rss: %w", err)
+		return fmt.Errorf("UpdateRss: %w", err)
 	}
-
-	return requireOneRow(res, "UpdateRss", model.ID)
-
+	return requireOneRow(res, "UpdateRss", id)
 }
 
 func (w *DBWriter) DeleteRss(id int64) error {
 	const q = `DELETE FROM rss WHERE id = ?`
 	res, err := w.db.Exec(q, id)
 	if err != nil {
-		return fmt.Errorf("delete rss: %w", err)
+		return fmt.Errorf("DeleteRss: %w", err)
 	}
-
 	return requireOneRow(res, "DeleteRss", id)
 }
-func (w *DBWriter) CreatePost(model *db.PostModel) error {
+
+// ---------------------------------------------------------------------------
+// Post
+// ---------------------------------------------------------------------------
+
+func (w *DBWriter) CreatePost(payload dto.PostPayload) (dto.MutationResult, error) {
+	m := postPayloadToModel(payload)
+
 	const q = `
 		INSERT INTO post (source_id, title, url, created_at, published_at)
-		VALUES (?,?,?,?,?)
-		`
-
-	res, err := w.db.Exec(q, model.RssID, model.Title, model.Url, model.CreatedAt, model.PublishedAt)
+		VALUES (?, ?, ?, ?, ?)`
+	res, err := w.db.Exec(q, m.RssID, m.Title, m.Url, m.CreatedAt, m.PublishedAt)
 	if err != nil {
-		return fmt.Errorf("create post: %w", err)
+		return dto.MutationResult{}, fmt.Errorf("CreatePost: %w", err)
 	}
-
 	id, err := res.LastInsertId()
 	if err != nil {
-		return fmt.Errorf("create post: retrieve id : %w", err)
+		return dto.MutationResult{}, fmt.Errorf("CreatePost: retrieve id: %w", err)
 	}
-	model.ID = id
-
-	return nil
+	return dto.MutationResult{GeneratedID: id}, nil
 }
 
-func (w *DBWriter) UpdatePostTitle(title string, id int64) error {
-	const q = `
-		UPDATE post SET title = ? WHERE id = ?
-		`
+func (w *DBWriter) UpdatePostTitle(id int64, title string) error {
+	const q = `UPDATE post SET title = ? WHERE id = ?`
 	res, err := w.db.Exec(q, title, id)
 	if err != nil {
-		return fmt.Errorf("update post : %w", err)
+		return fmt.Errorf("UpdatePostTitle: %w", err)
 	}
-
 	return requireOneRow(res, "UpdatePostTitle", id)
 }
+
 func (w *DBWriter) DeletePost(id int64) error {
 	const q = `DELETE FROM post WHERE id = ?`
 	res, err := w.db.Exec(q, id)
 	if err != nil {
-		return fmt.Errorf("delete post: %w", err)
+		return fmt.Errorf("DeletePost: %w", err)
 	}
-
 	return requireOneRow(res, "DeletePost", id)
 }
 
-func (w *DBWriter) CreatePostsBatch(models []*db.PostModel) (finalErr error) {
-	if len(models) == 0 {
-		return nil
-	}
-	tx, err := w.db.Begin()
-	if err != nil {
-		return fmt.Errorf("begin post batch: begin tx: %w", err)
+// CreatePostsBatch inserts a slice of PostPayloads in a single transaction.
+// On any failure the transaction is rolled back; no partial writes reach the DB.
+// Each MutationResult in the returned slice corresponds by index to the input payload.
+func (w *DBWriter) CreatePostsBatch(payloads []dto.PostPayload) (_ []dto.MutationResult, finalErr error) {
+	if len(payloads) == 0 {
+		return nil, nil
 	}
 
+	tx, err := w.db.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("CreatePostsBatch: begin tx: %w", err)
+	}
 	defer func() {
 		if finalErr != nil {
 			_ = tx.Rollback()
@@ -163,58 +155,94 @@ func (w *DBWriter) CreatePostsBatch(models []*db.PostModel) (finalErr error) {
 
 	const q = `
 		INSERT INTO post (source_id, title, url, created_at, published_at)
-		VALUES (?,?,?,?,?)`
-
+		VALUES (?, ?, ?, ?, ?)`
 	stmt, err := tx.Prepare(q)
-
 	if err != nil {
-		return fmt.Errorf("create batch: prepare: %w", err)
+		return nil, fmt.Errorf("CreatePostsBatch: prepare: %w", err)
 	}
 	defer func() {
-		if err := stmt.Close(); err != nil && finalErr == nil {
-			finalErr = fmt.Errorf("error closing stmt")
+		if closeErr := stmt.Close(); closeErr != nil && finalErr == nil {
+			finalErr = fmt.Errorf("CreatePostsBatch: close stmt: %w", closeErr)
 		}
 	}()
 
 	now := time.Now()
+	results := make([]dto.MutationResult, 0, len(payloads))
 
-	for _, m := range models {
+	for _, p := range payloads {
+		m := postPayloadToModel(p)
 		if m.CreatedAt.IsZero() {
 			m.CreatedAt = now
 		}
-		res, exeErr := stmt.Exec(m.RssID, m.Title, m.Url, m.CreatedAt, m.PublishedAt)
 
-		if exeErr != nil {
-			finalErr = fmt.Errorf("create post batch: insert %s:%w", m.Title, exeErr)
-			return finalErr
+		res, execErr := stmt.Exec(m.RssID, m.Title, m.Url, m.CreatedAt, m.PublishedAt)
+		if execErr != nil {
+			finalErr = fmt.Errorf("CreatePostsBatch: insert %q: %w", m.Title, execErr)
+			return nil, finalErr
 		}
 
 		id, idErr := res.LastInsertId()
 		if idErr != nil {
-			finalErr = fmt.Errorf("create post batch: retrieve id for %s: %w", m.Title, err)
-			return finalErr
-
+			finalErr = fmt.Errorf("CreatePostsBatch: retrieve id for %q: %w", m.Title, idErr)
+			return nil, finalErr
 		}
 
-		m.ID = id
+		results = append(results, dto.MutationResult{GeneratedID: id})
 	}
 
 	if err = tx.Commit(); err != nil {
-		finalErr = fmt.Errorf("create post batch: commit: %w", err)
-		return finalErr
+		finalErr = fmt.Errorf("CreatePostsBatch: commit: %w", err)
+		return nil, finalErr
 	}
 
-	return nil
+	return results, nil
 }
 
-// requireOneRow evaluates mutation metrics and raises errors if an entity reference was missing
+// ---------------------------------------------------------------------------
+// Private mappers — DTO → model
+//
+// time.Now() is stamped here so callers never need to think about created_at.
+// These are the only places in the package that construct db.*Model values.
+// ---------------------------------------------------------------------------
+
+func topicPayloadToModel(p dto.TopicPayload) model.TopicModel {
+	return model.TopicModel{
+		Name:      p.Name,
+		CreatedAt: time.Now(),
+	}
+}
+
+func rssPayloadToModel(p dto.RssPayload) model.RSSModel {
+	return model.RSSModel{
+		TopicID:   p.TopicID,
+		Title:     p.Title,
+		Url:       p.Url,
+		CreatedAt: time.Now(),
+	}
+}
+
+func postPayloadToModel(p dto.PostPayload) model.PostModel {
+	return model.PostModel{
+		RssID:       p.RssID,
+		Title:       p.Title,
+		Url:         p.Url,
+		CreatedAt:   time.Now(),
+		PublishedAt: p.PublishedAt,
+	}
+}
+
+// ---------------------------------------------------------------------------
+// requireOneRow evaluates mutation metrics and raises an error if the target
+// record was missing (zero rows affected).
+// ---------------------------------------------------------------------------
+
 func requireOneRow(res sql.Result, op string, id int64) error {
 	n, err := res.RowsAffected()
 	if err != nil {
 		return fmt.Errorf("%s: rows affected lookup failed: %w", op, err)
 	}
 	if n == 0 {
-		return fmt.Errorf("%s: target database record not modified, entity id %d does not exist", op, id)
+		return fmt.Errorf("%s: entity id %d does not exist", op, id)
 	}
 	return nil
 }
