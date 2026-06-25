@@ -1,4 +1,4 @@
-package db
+package model
 
 import (
 	"time"
@@ -14,7 +14,7 @@ type TopicModel struct {
 // RSSModel represents the "RSS" table entity
 type RSSModel struct {
 	ID        int64     `db:"id"`
-	TopicID	  int64	    `db:"tag"` // Foreign Key -> TopicModel.ID
+	TopicID	  int64	    `db:"topic_id"` // Foreign Key -> TopicModel.ID
 	Title     string    `db:"title"`
 	Url       string    `db:"url"` // The raw XML feed source URL
 	CreatedAt time.Time `db:"created_at"`	
@@ -28,4 +28,5 @@ type PostModel struct {
 	Title     string    `db:"title"`
 	Url       string    `db:"url"` // The unique target website landing page
 	CreatedAt time.Time `db:"created_at"`	
+	PublishedAt time.Time `db:"published_at"`
 }

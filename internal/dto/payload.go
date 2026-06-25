@@ -23,6 +23,7 @@ type TopicAllInOne struct {
 type TopicResponse struct {
 	TopicID   int64                 `json:"topicId"`
 	Rss       []RssItem      `json:"rss"`
+	Name string `json:"name"`
 	Summary   *BriefingTextResponse `json:"summary"`   // Inline pointer: nil means "not generated yet"
 	SummaryID int64                 `json:"summaryId"` 
 	CreatedAt time.Time             `json:"createdAt"`
@@ -62,4 +63,26 @@ type PostDetailResponse struct {
     Content     string                `json:"content"`
     Summary     *BriefingTextResponse `json:"summary,omitempty"`
     Slide       *BriefingSlideResponse `json:"slide,omitempty"`
+}
+
+type TopicPayload struct {
+	Name string
+}
+
+type RssPayload struct {
+	TopicID int64
+	Title   string
+	Url     string
+}
+
+type PostPayload struct {
+	RssID       int64
+	Title       string
+	Url         string
+	PublishedAt time.Time
+}
+
+type MutationResult struct {
+	GeneratedID int64
+	Err         error
 }
