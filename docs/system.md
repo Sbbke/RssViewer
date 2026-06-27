@@ -5,39 +5,32 @@ The system is devided into Three layer: Frontent (UI/Client) Layer, Service Laye
 Frontend communicate with backend through Service Layer, then Service Layer interact with data through Data Layer.
 ## Data Objects Design
 ### Local Storage  
-
-- **Rss Feed** <br>
-The local disk is strictly an asset cache holding the raw, untouched .xml payload exactly as it was fetched from the publisher's server.
-
-- **Post Content** <br>
-Processed content from html of a post.
-
 - **Summary** <br>
-have two types of summary: raw text and images slide.
+Only have images slide.
 
 ```bash
-/
-├── rss/
-│   └── {rss_id}/
-|       ├── rss.xml 
-│       ├── {post_id}.txt
-│       └── {post_id}.html
-└── summary/
+── summary/
     ├── topic/
     │   └── {topic_id}_{composite_rss_hash}/
-    │       ├── summary.txt
     │       └── slide/
     │           ├── 1.png
     │           └── 2.png
     └── post/
         └── {post_id}/
-            ├── summary.txt
             └── slide/
                 ├── 1.png
                 └── 2.png
 ```
 
 ### DB schema
+
+- **Rss Feed** <br>
+The holding the raw, untouched .xml payload exactly as it was fetched from the publisher's server.
+
+- **Post Content** <br>
+Processed content from html of a post.
+
+
 ### DTO
 
 # Service Layer
