@@ -99,8 +99,40 @@ The raw html come from different sources, each have their own naming of html ele
 CQRS
 SQLite handles concurrent reads brilliantly, but it only allows one single write operation at a time (it locks the database file). The automated scrapers might try to write newly crawled post pointers or summaries concurrently.
 
+1. The Write Path Workflow
+For mutations, the input data enters the system as a DTO payload constructed by your upstream application or API services.
+
+The upstream service builds the specific payload structural type, such as PostPayload.
+
+The Orchestrator ingests this DTO directly, wraps it within the WriteTask envelope, and delivers it to the worker channel pool without modification.
+
+The concrete storage writer implementation inside writer/sql.go unpacks the DTO and handles the mapping to the schema variables right before binding the values to the database driver execution context.
+
+This ordering ensures that if your database schema changes, the modification is completely contained within writer/sql.go, leaving the core Orchestrator code untouched.
+
+2. The Read Path Workflow
+For retrieval operations, your application circumvents the write serialization machinery entirely by leveraging parallel reads.
+
+The upstream service requests a read connection handle from the Orchestrator via RequestRead.
+
+The dedicated reader module executes the SQL query against the database engine.
+
+The reader scans the row data directly into the properties of your DTO struct.
+
+The internal database schema model should never escape the perimeter of your read execution files, ensuring the API boundary receives clean, aggregated data structures optimized for presentation.
+
 ## Orchestrator
-Manage goroutine for data manipulation.
+Manage goroutine for data manipulation. Controlling over writer and reader goroutine, limiting only 1 writer. All data manipulation should go through the orchetrator, basically a datalayer manager.
+
+- RequestReadTopic()
+- RequestReadRss()
+- RequestReadPost()
+- RequestWriteTopic()
+- RequestWriteRss()
+- RequestWritePost()
+
+
+## CQRS
 - DBReader <br>
 Dedicated to Read operation
 > Services can request a reader for read operation
@@ -108,9 +140,51 @@ Dedicated to Read operation
 Implement basic CUD operation to 1.DB, and 2. Local Disk.
 > Channel all write operations through a single Go worker goroutine to prevent "database is locked" (SQLITE_BUSY) errors.
 
-## CQRS
+``` bash
+Functional grouping:
+├── interface.go
+├── orchestrate.go
+├── reader
+│   ├── local.go
+│   ├── local_test.go
+│   └── sql.go
+├── sqlinit.go
+└── writer
+    ├── local.go
+    ├── local_test.go
+    └── sql.go
+
+Technology grouping:
+├── interface.go
+├── orchestrate.go
+├──local
+    ├── reader.go
+│   └── writer.go
+├── sql
+    ├── writer.go
+    └── reader.go
+```
 ### DB
 single-source DTOs are assembled in the reader; multi-source DTOs are assembled in the service.
+
+** Sqlite Concrete Implementation **
+- GetDB(): return sql.DB
+- initDB(): take a path as input and init sqlite db
+
+** reader **
+- GetTopics
+- GetTopicByID
+- GetRssByTopic
+- GetRssByID
+- GetPostsByRss
+- GetPostByID
+- GetPostsByTopic
+
+** writer **
+- CreateTopic, UpdataTopic, DeleteTopic
+- CreateRss, UpdataRss, DeleteRss
+- CreatePost, UpdatePostTitle, DeletePost
+- CreatePostBatch
 
 ### Local
 Since every modification will go through db layer first (checking duplication, fetching essential data such as ID and title ...etc.), so implment fairly simple local file manipulation (CURD).
@@ -126,7 +200,7 @@ Save Topic raw text summary to the folder with given topic.ID, related rss.ID an
 - CreateTopicSlide() : <br>
 Save Topic raw image slide file to the folder with given topic.ID, related rss.ID and summary.
 
-- For every Update operation, call Delete operation to remove target endpoint(rss, post summary, topic summary, or topic slide) then call Create operations.
+- For every Update operation, implement atomic swap: call Delete operation to remove (move to temp) target endpoint(rss, post summary, topic summary, or topic slide) then call Create operations.
 
 
 

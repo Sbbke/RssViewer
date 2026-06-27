@@ -69,10 +69,22 @@ type TopicPayload struct {
 	Name string
 }
 
+type TopicSummaryPayload struct{
+	TopicID int64
+	Body string
+}
+
+type TopicSlidePayload struct{
+	TopicID int64
+	Slide [][]byte
+}
+
+
 type RssPayload struct {
 	TopicID int64
 	Title   string
 	Url     string
+	Content string
 }
 
 type PostPayload struct {
@@ -80,6 +92,16 @@ type PostPayload struct {
 	Title       string
 	Url         string
 	PublishedAt time.Time
+}
+
+type PostSummaryPayload struct{
+	PostID int64
+	Body string
+}
+
+type PostSlidePayload struct{
+	PostID int64
+	Slide [][]byte
 }
 
 type MutationResult struct {

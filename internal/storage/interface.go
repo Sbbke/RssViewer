@@ -4,7 +4,6 @@ import (
 	"database/sql"
 )
 
-
 // ---------------------------------------------------------------------------
 // Interfaces
 // ---------------------------------------------------------------------------
@@ -24,13 +23,15 @@ type SQLAccessor interface {
 type TaskType string
 
 const (
-	TaskCreateTopic       TaskType = "CREATE_TOPIC"
-	TaskCreateRss         TaskType = "CREATE_RSS"         // dual: DB + local dir scaffold
-	TaskCreatePost        TaskType = "CREATE_POST"        // DB only — no summary/slide yet
-	TaskCreatePostBatch   TaskType = "CREATE_POST_BATCH"  // DB only batch insert
-	TaskUpdatePostTitle   TaskType = "UPDATE_POST_TITLE"
-	TaskCreatePostSummary TaskType = "CREATE_POST_SUMMARY" // primary write: local txt
-	TaskCreatePostSlide   TaskType = "CREATE_POST_SLIDE"   // primary write: local png(s)
+	TaskCreateTopic        TaskType = "CREATE_TOPIC"
+	TaskCreateRss          TaskType = "CREATE_RSS"        // dual: DB + local dir scaffold
+	TaskCreatePost         TaskType = "CREATE_POST"       // DB only — no summary/slide yet
+	TaskCreatePostBatch    TaskType = "CREATE_POST_BATCH" // DB only batch insert
+	TaskUpdatePostTitle    TaskType = "UPDATE_POST_TITLE"
+	TaskCreatePostSummary  TaskType = "CREATE_POST_SUMMARY" // primary write: local txt
+	TaskCreatePostSlide    TaskType = "CREATE_POST_SLIDE"   // primary write: local png(s)
+	TaskCreateTopicSummary TaskType = "CREATE_TOPIC_SUMMARY"
+	TaskCreateTopicSlide   TaskType = "CREATE_TOPIC_SLIDE"
 )
 
 // WriteTask is the envelope placed onto the worker channel.
@@ -38,7 +39,7 @@ const (
 // when the caller has already moved on (fire-and-forget style).
 type WriteTask struct {
 	Type    TaskType
-	Payload any      // concrete dto.* type; each case asserts the expected type
+	Payload any // concrete dto.* type; each case asserts the expected type
 	ErrChan chan error
 }
 
@@ -48,5 +49,3 @@ type UpdatePostTitlePayload struct {
 	PostID int64
 	Title  string
 }
-
-
