@@ -2,17 +2,17 @@ package storage
 
 import (
 	"RssViewer/internal/dto"
-	"RssViewer/internal/storage/reader"
-	"RssViewer/internal/storage/writer"
+	"RssViewer/internal/storage/images/local"
+	"RssViewer/internal/storage/meta/sqlite"
 	"fmt"
 )
 
 type DataOrch struct {
 	dbLayer     SQLAccessor
-	dbWriter    *writer.DBWriter
-	localWriter *writer.LocalWriter
-	dbReader    *reader.DBReader
-	localReader *reader.LocalReader
+	dbWriter    *meta.DBWriter
+	localWriter *images.LocalWriter
+	dbReader    *meta.DBReader
+	localReader *images.LocalReader
 	taskCh      chan WriteTask
 	done        chan struct{}
 }
@@ -20,17 +20,17 @@ type DataOrch struct {
 func NewDataOrch(db SQLAccessor, baseDiskPath string) (*DataOrch, error) {
 	raw := db.GetDB()
 
-	dbw, err := writer.NewDBWriter(raw)
+	dbw, err := meta.NewDBWriter(raw)
 	if err != nil {
 		return nil, fmt.Errorf("NewDataOrch: db writer: %w", err)
 	}
-	lw := writer.NewLocalWriter(baseDiskPath)
+	lw := images.NewLocalWriter(baseDiskPath)
 
-	dbr, err := reader.NewDBReader(raw)
+	dbr, err := meta.NewDBReader(raw)
 	if err != nil {
 		return nil, fmt.Errorf("NewDataOrch: db reader: %w", err)
 	}
-	lr := reader.NewLocalReader(baseDiskPath)
+	lr := images.NewLocalReader(baseDiskPath)
 
 	do := &DataOrch{
 		dbLayer:     db,
@@ -56,12 +56,12 @@ func (do *DataOrch) Shutdown() {
 
 // GetReader returns the SQL reader for direct use by services.
 // Reads bypass the channel — SQLite handles concurrent reads natively.
-func (do *DataOrch) GetReader() *reader.DBReader {
+func (do *DataOrch) GetReader() *meta.DBReader {
 	return do.dbReader
 }
 
 // GetLocalReader returns the local-file reader for direct use by services.
-func (do *DataOrch) GetLocalReader() *reader.LocalReader {
+func (do *DataOrch) GetLocalReader() *images.LocalReader {
 	return do.localReader
 }
 

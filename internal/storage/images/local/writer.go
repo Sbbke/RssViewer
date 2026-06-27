@@ -1,4 +1,5 @@
-package writer
+package images 
+
 
 import (
 	"fmt"

@@ -1,5 +1,4 @@
-package reader
-
+package sqlite 
 import (
 	"database/sql"
 	"errors"

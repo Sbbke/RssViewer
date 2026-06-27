@@ -1,4 +1,4 @@
-package storage_test
+package meta_test
 
 import (
 	"database/sql"
@@ -9,8 +9,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
  
 	"RssViewer/internal/dto"
-	"RssViewer/internal/storage/reader"
-	"RssViewer/internal/storage/writer"
 )
 
 

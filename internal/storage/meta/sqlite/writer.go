@@ -1,4 +1,4 @@
-package writer
+package  meta
 
 import (
 	"database/sql"
