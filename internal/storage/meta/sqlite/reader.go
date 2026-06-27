@@ -1,4 +1,4 @@
-package sqlite 
+package  meta
 import (
 	"database/sql"
 	"errors"

@@ -5,14 +5,15 @@ import (
 	"errors"
 	"testing"
 	"time"
- 
+	 
 	_ "github.com/mattn/go-sqlite3"
  
 	"RssViewer/internal/dto"
+	"RssViewer/internal/storage/meta/sqlite"
 )
 
 
-func testDB(t *testing.T) (*reader.DBReader, *writer.DBWriter){
+func testDB(t *testing.T) (*meta.DBReader, *meta.DBWriter){
 
 	t.Helper()
 	db,err := sql.Open("sqlite3", ":memory:")
@@ -52,11 +53,11 @@ func testDB(t *testing.T) (*reader.DBReader, *writer.DBWriter){
 		t.Fatalf("create schema: %v", err)
 	}
  
-	r, err := reader.NewDBReader(db)
+	r, err := meta.NewDBReader(db)
 	if err != nil {
 		t.Fatalf("new reader: %v", err)
 	}
-	w, err := writer.NewDBWriter(db)
+	w, err := meta.NewDBWriter(db)
 	if err != nil {
 		t.Fatalf("new writer: %v", err)
 	}
@@ -65,7 +66,7 @@ func testDB(t *testing.T) (*reader.DBReader, *writer.DBWriter){
  
 // seed inserts one topic → one rss → one post and returns their IDs.
 // Used by tests that need existing rows without caring about the insert itself.
-func seed(t *testing.T, w *writer.DBWriter) (topicID, rssID, postID int64) {
+func seed(t *testing.T, w *meta.DBWriter) (topicID, rssID, postID int64) {
 	t.Helper()
  
 	tr, err := w.CreateTopic(dto.TopicPayload{Name: "AI"})

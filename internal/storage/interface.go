@@ -12,8 +12,10 @@ import (
 // The orchestrator only needs the live *sql.DB handle, keeping it decoupled
 // from the concrete wrapper type.
 type SQLAccessor interface {
+
 	GetDB() *sql.DB
 }
+
 
 // ---------------------------------------------------------------------------
 // Task types

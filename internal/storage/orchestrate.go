@@ -10,8 +10,8 @@ import (
 type DataOrch struct {
 	dbLayer     SQLAccessor
 	dbWriter    *meta.DBWriter
-	localWriter *images.LocalWriter
 	dbReader    *meta.DBReader
+	localWriter *images.LocalWriter
 	localReader *images.LocalReader
 	taskCh      chan WriteTask
 	done        chan struct{}
