@@ -4,11 +4,12 @@ import (
 	"RssViewer/internal/dto"
 	"RssViewer/internal/storage/images/local"
 	"RssViewer/internal/storage/meta/sqlite"
+	"database/sql"
 	"fmt"
 )
 
 type DataOrch struct {
-	dbLayer     SQLAccessor
+	dbAcessor  SQLAccessor
 	dbWriter    *meta.DBWriter
 	dbReader    *meta.DBReader
 	localWriter *images.LocalWriter
@@ -29,11 +30,11 @@ func NewDataOrch(db SQLAccessor, baseDiskPath string) (*DataOrch, error) {
 	dbr, err := meta.NewDBReader(raw)
 	if err != nil {
 		return nil, fmt.Errorf("NewDataOrch: db reader: %w", err)
-	}
+	} 
 	lr := images.NewLocalReader(baseDiskPath)
 
 	do := &DataOrch{
-		dbLayer:     db,
+		dbAcessor: db,
 		dbWriter:    dbw,
 		localWriter: lw,
 		dbReader:    dbr,
@@ -65,46 +66,124 @@ func (do *DataOrch) GetLocalReader() *images.LocalReader {
 	return do.localReader
 }
 
-// SubmitWrite enqueues a task onto the single worker goroutine.
+// SubmitWrite enqueues  a task onto the single worker goroutine.
 // It is safe to call from any goroutine. The caller owns ErrChan and must
 // receive from it to avoid the worker blocking on a full channel.
 func (do *DataOrch) SubmitWrite(task WriteTask) {
 	do.taskCh <- task
 }
 
-func (do *DataOrch) RequestRead() SQLAccessor {
-	return do.dbLayer
+func (do *DataOrch) DB() *sql.DB {
+    return do.dbAcessor.GetDB()
 }
-
 // ---------------------------------------------------------------------------
 // Worker loop — single goroutine, serializes all writes
 // ---------------------------------------------------------------------------
+func (do *DataOrch) AddTopic(p dto.TopicPayload)(dto.MutationResult, error){
+
+	task := WriteTask{
+		Type:       TaskCreateTopic,
+		Payload:    p,
+		ErrChan:    make(chan error, 1),
+		ResultChan: make(chan dto.MutationResult, 1),
+	}
+
+	// Dispatch to the serialized loop channel
+	do.SubmitWrite(task)
+
+	// Block until the single-writer loop processes it and responds
+	select {
+	case err := <-task.ErrChan:
+		return dto.MutationResult{}, err
+	case result := <-task.ResultChan:
+		return result, nil
+	}
+}
+
+func (do *DataOrch) AddPost(p dto.PostPayload)(dto.MutationResult, error){
+
+	task := WriteTask{
+		Type:       TaskCreatePost,
+		Payload:    p,
+		ErrChan:    make(chan error, 1),
+		ResultChan: make(chan dto.MutationResult, 1),
+	}
+
+	// Dispatch to the serialized loop channel
+	do.SubmitWrite(task)
+
+	// Block until the single-writer loop processes it and responds
+	select {
+	case err := <-task.ErrChan:
+		return dto.MutationResult{}, err
+	case result := <-task.ResultChan:
+		return result, nil
+	}
+}
+
+// AddRss registers an RSS feed source and returns the generated DB record metadata
+func (do *DataOrch) AddRss(p dto.RssPayload) (dto.MutationResult, error) {
+	task := WriteTask{
+		Type:       TaskCreateRss,
+		Payload:    p,
+		ErrChan:    make(chan error, 1),
+		ResultChan: make(chan dto.MutationResult, 1),
+	}
+	do.SubmitWrite(task)
+
+	select {
+	case err := <-task.ErrChan:
+		return dto.MutationResult{}, err
+	case result := <-task.ResultChan:
+		return result, nil
+	}
+}
+
+// AddPostBatch inserts parsed feed elements inside a single atomic database transaction
+func (do *DataOrch) AddPostBatch(posts []dto.PostPayload) error {
+	task := WriteTask{
+		Type:    TaskCreatePostBatch,
+		Payload: posts,
+		ErrChan: make(chan error, 1),
+	}
+	do.SubmitWrite(task)
+
+
+	return <-task.ErrChan
+
+}
 
 func (do *DataOrch) runWorker() {
 	defer close(do.done)
 	for task := range do.taskCh {
-		err := do.executeInternalMutation(task)
-		if task.ErrChan != nil {
+		result, err := do.executeInternalMutation(task)
+		if err != nil {
 			task.ErrChan <- err
-		}
+   	     } else if task.ResultChan != nil {
+   	         task.ResultChan <- result
+   	     } else {
+   	         task.ErrChan <- nil  // unblock callers like AddPostBatch that only listen on ErrChan
+  	      }
 	}
 }
 
+
+ 
 // ---------------------------------------------------------------------------
 // Mutation dispatch
 // ---------------------------------------------------------------------------
 
-func (do *DataOrch) executeInternalMutation(task WriteTask) error {
+func (do *DataOrch) executeInternalMutation(task WriteTask) (dto.MutationResult, error) {
 	switch task.Type {
 
 	// -----------------------------------------------------------------------
 	case TaskCreateTopic:
 		p, ok := task.Payload.(dto.TopicPayload)
 		if !ok {
-			return fmt.Errorf("%s: unexpected payload type %T", task.Type, task.Payload)
+			return dto.MutationResult{},unexpectedPayload(task) 
+
 		}
-		_, err := do.dbWriter.CreateTopic(p)
-		return err
+		return  do.dbWriter.CreateTopic(p)
 
 	// -----------------------------------------------------------------------
 	// Dual-target sequence:
@@ -113,16 +192,9 @@ func (do *DataOrch) executeInternalMutation(task WriteTask) error {
 	case TaskCreateRss:
 		p, ok := task.Payload.(dto.RssPayload)
 		if !ok {
-			return fmt.Errorf("%s: unexpected payload type %T", task.Type, task.Payload)
+			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		result, err := do.dbWriter.CreateRss(p)
-		if err != nil {
-			return err
-		}
-		if err := do.localWriter.CreateRss(result.GeneratedID, p.Content); err != nil {
-			return fmt.Errorf("%s: local write rss_id=%d: %w", task.Type, result.GeneratedID, err)
-		}
-		return nil
+		return do.dbWriter.CreateRss(p)
 
 	// -----------------------------------------------------------------------
 	// DB-only: the post pointer is stored; content lives on disk and is
@@ -130,27 +202,29 @@ func (do *DataOrch) executeInternalMutation(task WriteTask) error {
 	case TaskCreatePost:
 		p, ok := task.Payload.(dto.PostPayload)
 		if !ok {
-			return fmt.Errorf("%s: unexpected payload type %T", task.Type, task.Payload)
+			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		_, err := do.dbWriter.CreatePost(p)
-		return err
+		return do.dbWriter.CreatePost(p)
 
 	// -----------------------------------------------------------------------
 	case TaskCreatePostBatch:
 		p, ok := task.Payload.([]dto.PostPayload)
 		if !ok {
-			return fmt.Errorf("%s: unexpected payload type %T", task.Type, task.Payload)
+			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		_, err := do.dbWriter.CreatePostsBatch(p)
-		return err
+		_, err:= do.dbWriter.CreatePostsBatch(p)
+		if err != nil{
+			return dto.MutationResult{}, err
+		}
+		return dto.MutationResult{}, nil	
 
 	// -----------------------------------------------------------------------
 	case TaskUpdatePostTitle:
 		p, ok := task.Payload.(UpdatePostTitlePayload)
 		if !ok {
-			return fmt.Errorf("%s: unexpected payload type %T", task.Type, task.Payload)
+			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		return do.dbWriter.UpdatePostTitle(p.PostID, p.Title)
+		return dto.MutationResult{}, do.dbWriter.UpdatePostTitle(p.PostID, p.Title)
 
 	// -----------------------------------------------------------------------
 	// Primary write is local (large text blob); no DB row needed for content.
@@ -159,9 +233,9 @@ func (do *DataOrch) executeInternalMutation(task WriteTask) error {
 	case TaskCreatePostSummary:
 		p, ok := task.Payload.(dto.PostSummaryPayload)
 		if !ok {
-			return fmt.Errorf("%s: unexpected payload type %T", task.Type, task.Payload)
+			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		return do.localWriter.CreatePostSummary(p.PostID, p.Body)
+		return dto.MutationResult{}, do.localWriter.CreatePostSummary(p.PostID, p.Body)
 
 	// -----------------------------------------------------------------------
 	// Primary write is local (PNG files); paths are written back to DB so the
@@ -171,27 +245,28 @@ func (do *DataOrch) executeInternalMutation(task WriteTask) error {
 	case TaskCreatePostSlide:
 		p, ok := task.Payload.(dto.PostSlidePayload)
 		if !ok {
-			return fmt.Errorf("%s: unexpected payload type %T", task.Type, task.Payload)
+			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		return do.localWriter.CreatePostSlide(p.PostID, p.Slide)
+		return  dto.MutationResult{}, do.localWriter.CreatePostSlide(p.PostID, p.Slide)
 		// -----------------------------------------------------------------------
 
 	case TaskCreateTopicSummary:
 		p, ok := task.Payload.(dto.TopicSummaryPayload)
 		if !ok {
-			return unexpectedPayload(task)
+			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		return do.localWriter.CreatePostSummary(p.TopicID, p.Body)
+		return dto.MutationResult{}, do.localWriter.CreatePostSummary(p.TopicID, p.Body)
 
 	case TaskCreateTopicSlide:
 		p, ok := task.Payload.(dto.TopicSlidePayload)
 		if !ok {
-			return unexpectedPayload(task)
+			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		return do.localWriter.CreatePostSlide(p.TopicID, p.Slide)
+		return dto.MutationResult{}, do.localWriter.CreatePostSlide(p.TopicID, p.Slide)
 
 	default:
-		return fmt.Errorf("executeInternalMutation: unrecognized task type %q", task.Type)
+		return dto.MutationResult{}, unexpectedPayload(task)
+		
 	}
 }
 

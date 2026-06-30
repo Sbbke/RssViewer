@@ -64,8 +64,8 @@ func (w *DBWriter) DeleteTopic(id int64) error {
 func (w *DBWriter) CreateRss(payload dto.RssPayload) (dto.MutationResult, error) {
 	m := rssPayloadToModel(payload)
 
-	const q = `INSERT INTO rss (topic_id, title, url, created_at) VALUES (?, ?, ?, ?)`
-	res, err := w.db.Exec(q, m.TopicID, m.Title, m.Url, m.CreatedAt)
+	const q = `INSERT INTO rss ( title, url, xml, created_at) VALUES (?, ?, ?, ?)`
+	res, err := w.db.Exec(q,  m.Title, m.Url, m.Xml, m.CreatedAt)
 	if err != nil {
 		return dto.MutationResult{}, fmt.Errorf("CreateRss: %w", err)
 	}
@@ -77,10 +77,8 @@ func (w *DBWriter) CreateRss(payload dto.RssPayload) (dto.MutationResult, error)
 }
 
 func (w *DBWriter) UpdateRss(id int64, payload dto.RssPayload) error {
-	// NOTE: original query was missing a comma between the SET assignments.
-	// SET title = ?, url = ? is required; SET title = ? url = ? is a syntax error.
-	const q = `UPDATE rss SET title = ?, url = ? WHERE id = ?`
-	res, err := w.db.Exec(q, payload.Title, payload.Url, id)
+	const q = `UPDATE rss SET title = ?, xml = ?, url = ? WHERE id = ?`
+	res, err := w.db.Exec(q, payload.Title, payload.Xml, payload.Url, id)
 	if err != nil {
 		return fmt.Errorf("UpdateRss: %w", err)
 	}
@@ -104,9 +102,9 @@ func (w *DBWriter) CreatePost(payload dto.PostPayload) (dto.MutationResult, erro
 	m := postPayloadToModel(payload)
 
 	const q = `
-		INSERT INTO post (source_id, title, url, created_at, published_at)
-		VALUES (?, ?, ?, ?, ?)`
-	res, err := w.db.Exec(q, m.RssID, m.Title, m.Url, m.CreatedAt, m.PublishedAt)
+		INSERT INTO post (source_id, title, url, content, created_at, published_at)
+		VALUES (?, ?, ?, ?, ?, ?)`
+	res, err := w.db.Exec(q, m.RssID, m.Title, m.Url,m.Content, m.CreatedAt, m.PublishedAt)
 	if err != nil {
 		return dto.MutationResult{}, fmt.Errorf("CreatePost: %w", err)
 	}
@@ -147,22 +145,25 @@ func (w *DBWriter) CreatePostsBatch(payloads []dto.PostPayload) (_ []dto.Mutatio
 	if err != nil {
 		return nil, fmt.Errorf("CreatePostsBatch: begin tx: %w", err)
 	}
+	// Secure deferred stack unwind safety
 	defer func() {
 		if finalErr != nil {
 			_ = tx.Rollback()
 		}
 	}()
 
+	// 1. Fully aligned 6 positional argument mappings matching destination tables
 	const q = `
-		INSERT INTO post (source_id, title, url, created_at, published_at)
-		VALUES (?, ?, ?, ?, ?)`
+		INSERT INTO post (source_id, title, url, content, created_at, published_at)
+		VALUES (?, ?, ?, ?, ?, ?)`
+	
 	stmt, err := tx.Prepare(q)
 	if err != nil {
-		return nil, fmt.Errorf("CreatePostsBatch: prepare: %w", err)
+		return nil, fmt.Errorf("CreatePostsBatch: prepare statement layout: %w", err)
 	}
 	defer func() {
 		if closeErr := stmt.Close(); closeErr != nil && finalErr == nil {
-			finalErr = fmt.Errorf("CreatePostsBatch: close stmt: %w", closeErr)
+			finalErr = fmt.Errorf("CreatePostsBatch: close prepared statement handle: %w", closeErr)
 		}
 	}()
 
@@ -170,20 +171,25 @@ func (w *DBWriter) CreatePostsBatch(payloads []dto.PostPayload) (_ []dto.Mutatio
 	results := make([]dto.MutationResult, 0, len(payloads))
 
 	for _, p := range payloads {
+		// Convert DTO layer structural elements down to Model domain values
 		m := postPayloadToModel(p)
+		
+		// Fallback timestamp generation validations
 		if m.CreatedAt.IsZero() {
 			m.CreatedAt = now
 		}
+		
 
-		res, execErr := stmt.Exec(m.RssID, m.Title, m.Url, m.CreatedAt, m.PublishedAt)
+		// 2. FIXED: Explicitly provide all 6 bound input parameter rows including content
+		res, execErr := stmt.Exec(m.RssID, m.Title, m.Url, m.Content, m.CreatedAt, m.PublishedAt)
 		if execErr != nil {
-			finalErr = fmt.Errorf("CreatePostsBatch: insert %q: %w", m.Title, execErr)
+			finalErr = fmt.Errorf("CreatePostsBatch: insert transaction processing failure for %q: %w", m.Title, execErr)
 			return nil, finalErr
 		}
 
 		id, idErr := res.LastInsertId()
 		if idErr != nil {
-			finalErr = fmt.Errorf("CreatePostsBatch: retrieve id for %q: %w", m.Title, idErr)
+			finalErr = fmt.Errorf("CreatePostsBatch: retrieve generated database primary key identity for %q: %w", m.Title, idErr)
 			return nil, finalErr
 		}
 
@@ -191,7 +197,7 @@ func (w *DBWriter) CreatePostsBatch(payloads []dto.PostPayload) (_ []dto.Mutatio
 	}
 
 	if err = tx.Commit(); err != nil {
-		finalErr = fmt.Errorf("CreatePostsBatch: commit: %w", err)
+		finalErr = fmt.Errorf("CreatePostsBatch: commit transaction state boundaries: %w", err)
 		return nil, finalErr
 	}
 
@@ -214,9 +220,9 @@ func topicPayloadToModel(p dto.TopicPayload) model.TopicModel {
 
 func rssPayloadToModel(p dto.RssPayload) model.RSSModel {
 	return model.RSSModel{
-		TopicID:   p.TopicID,
 		Title:     p.Title,
 		Url:       p.Url,
+		Xml: p.Xml,
 		CreatedAt: time.Now(),
 	}
 }
@@ -226,6 +232,7 @@ func postPayloadToModel(p dto.PostPayload) model.PostModel {
 		RssID:       p.RssID,
 		Title:       p.Title,
 		Url:         p.Url,
+		Content: p.Content,
 		CreatedAt:   time.Now(),
 		PublishedAt: p.PublishedAt,
 	}

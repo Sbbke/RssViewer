@@ -9,16 +9,16 @@ import (
 	"path/filepath"
 )
 
-type sqliteDb struct {
-	db *sql.DB
+type SqliteDb struct {
+	Db *sql.DB
 }
 
 // GetDB exposes the underlying raw connection pool pointer safely to your internal readers and writers
-func (s *sqliteDb) GetDB() *sql.DB {
-	return s.db
+func (s *SqliteDb) GetDB() *sql.DB {
+	return s.Db
 }
 
-func initDB(dbPath string) (*sqliteDb, error) {
+func initDB(dbPath string) (*SqliteDb, error) {
 	if dbPath == "" {
 		return nil, errors.New("database path configuration must not be empty")
 	}
@@ -50,5 +50,5 @@ func initDB(dbPath string) (*sqliteDb, error) {
 	db.SetMaxOpenConns(100)
 	db.SetMaxIdleConns(10)
 
-	return &sqliteDb{db: db}, nil
+	return &SqliteDb{Db: db}, nil
 }

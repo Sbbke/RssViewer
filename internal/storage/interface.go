@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"RssViewer/internal/dto"
 	"database/sql"
 )
 
@@ -36,17 +37,13 @@ const (
 	TaskCreateTopicSlide   TaskType = "CREATE_TOPIC_SLIDE"
 )
 
-// WriteTask is the envelope placed onto the worker channel.
-// ErrChan must be a buffered channel of size ≥ 1 so the worker never blocks
-// when the caller has already moved on (fire-and-forget style).
+
 type WriteTask struct {
 	Type    TaskType
 	Payload any // concrete dto.* type; each case asserts the expected type
+	ResultChan chan dto.MutationResult
 	ErrChan chan error
 }
-
-// UpdatePostTitlePayload carries the two scalars needed for that specific update.
-// It does not belong in dto because it is purely an orchestration concern.
 type UpdatePostTitlePayload struct {
 	PostID int64
 	Title  string

@@ -201,7 +201,7 @@ func (r *DBReader) GetPostByID(postID int64) (dto.PostItem, error) {
 }
 
 // GetPostURL returns the landing page URL for a post.
-// Used by the HTML processor (GetContent) as its fetch starting point.
+// Used by the HTML processor (GetContent) as its fetch  starting point.
 // Returns a plain string — no DTO wrapper needed for a single scalar value.
 func (r *DBReader) GetPostURL(postID int64) (string, error) {
 	const q = `SELECT url FROM post WHERE id = ?`
@@ -367,7 +367,7 @@ func topicModelToResponse(m model.TopicModel) dto.TopicResponse {
 	return dto.TopicResponse{
 		TopicID:   m.ID,
 		Name:      m.Name,
-		CreatedAt: m.CreatedAt,
+		CreatedAt: m.CreatedAt.Format(time.RFC3339),
 		// Rss, Summary, SummaryID left at zero — caller populates if needed
 	}
 }
