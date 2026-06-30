@@ -9,7 +9,7 @@ import (
 )
 
 type DataOrch struct {
-	dbAcessor  SQLAccessor
+	dbAcessor   SQLAccessor
 	dbWriter    *meta.DBWriter
 	dbReader    *meta.DBReader
 	localWriter *images.LocalWriter
@@ -30,11 +30,11 @@ func NewDataOrch(db SQLAccessor, baseDiskPath string) (*DataOrch, error) {
 	dbr, err := meta.NewDBReader(raw)
 	if err != nil {
 		return nil, fmt.Errorf("NewDataOrch: db reader: %w", err)
-	} 
+	}
 	lr := images.NewLocalReader(baseDiskPath)
 
 	do := &DataOrch{
-		dbAcessor: db,
+		dbAcessor:   db,
 		dbWriter:    dbw,
 		localWriter: lw,
 		dbReader:    dbr,
@@ -74,12 +74,13 @@ func (do *DataOrch) SubmitWrite(task WriteTask) {
 }
 
 func (do *DataOrch) DB() *sql.DB {
-    return do.dbAcessor.GetDB()
+	return do.dbAcessor.GetDB()
 }
+
 // ---------------------------------------------------------------------------
 // Worker loop — single goroutine, serializes all writes
 // ---------------------------------------------------------------------------
-func (do *DataOrch) AddTopic(p dto.TopicPayload)(dto.MutationResult, error){
+func (do *DataOrch) AddTopic(p dto.TopicPayload) (dto.MutationResult, error) {
 
 	task := WriteTask{
 		Type:       TaskCreateTopic,
@@ -100,7 +101,7 @@ func (do *DataOrch) AddTopic(p dto.TopicPayload)(dto.MutationResult, error){
 	}
 }
 
-func (do *DataOrch) AddPost(p dto.PostPayload)(dto.MutationResult, error){
+func (do *DataOrch) AddPost(p dto.PostPayload) (dto.MutationResult, error) {
 
 	task := WriteTask{
 		Type:       TaskCreatePost,
@@ -148,9 +149,38 @@ func (do *DataOrch) AddPostBatch(posts []dto.PostPayload) error {
 	}
 	do.SubmitWrite(task)
 
-
 	return <-task.ErrChan
 
+}
+
+func (do *DataOrch) DeleteRss(id int64) error {
+	task := WriteTask{
+		Type:    TaskDeleteRss,
+		Payload: id,
+		ErrChan: make(chan error, 1),
+	}
+	do.SubmitWrite(task)
+	return <-task.ErrChan
+}
+
+func (do *DataOrch) DeleteTopic(id int64) error {
+	task := WriteTask{
+		Type:    TaskDeleteTopic,
+		Payload: id,
+		ErrChan: make(chan error, 1),
+	}
+	do.SubmitWrite(task)
+	return <-task.ErrChan
+}
+
+func (do *DataOrch) DeletePost(id int64) error {
+	task := WriteTask{
+		Type:    TaskDeletePost,
+		Payload: id,
+		ErrChan: make(chan error, 1),
+	}
+	do.SubmitWrite(task)
+	return <-task.ErrChan
 }
 
 func (do *DataOrch) runWorker() {
@@ -159,16 +189,14 @@ func (do *DataOrch) runWorker() {
 		result, err := do.executeInternalMutation(task)
 		if err != nil {
 			task.ErrChan <- err
-   	     } else if task.ResultChan != nil {
-   	         task.ResultChan <- result
-   	     } else {
-   	         task.ErrChan <- nil  // unblock callers like AddPostBatch that only listen on ErrChan
-  	      }
+		} else if task.ResultChan != nil {
+			task.ResultChan <- result
+		} else {
+			task.ErrChan <- nil // unblock callers like AddPostBatch that only listen on ErrChan
+		}
 	}
 }
 
-
- 
 // ---------------------------------------------------------------------------
 // Mutation dispatch
 // ---------------------------------------------------------------------------
@@ -180,10 +208,10 @@ func (do *DataOrch) executeInternalMutation(task WriteTask) (dto.MutationResult,
 	case TaskCreateTopic:
 		p, ok := task.Payload.(dto.TopicPayload)
 		if !ok {
-			return dto.MutationResult{},unexpectedPayload(task) 
+			return dto.MutationResult{}, unexpectedPayload(task)
 
 		}
-		return  do.dbWriter.CreateTopic(p)
+		return do.dbWriter.CreateTopic(p)
 
 	// -----------------------------------------------------------------------
 	// Dual-target sequence:
@@ -212,11 +240,11 @@ func (do *DataOrch) executeInternalMutation(task WriteTask) (dto.MutationResult,
 		if !ok {
 			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		_, err:= do.dbWriter.CreatePostsBatch(p)
-		if err != nil{
+		_, err := do.dbWriter.CreatePostsBatch(p)
+		if err != nil {
 			return dto.MutationResult{}, err
 		}
-		return dto.MutationResult{}, nil	
+		return dto.MutationResult{}, nil
 
 	// -----------------------------------------------------------------------
 	case TaskUpdatePostTitle:
@@ -247,7 +275,7 @@ func (do *DataOrch) executeInternalMutation(task WriteTask) (dto.MutationResult,
 		if !ok {
 			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		return  dto.MutationResult{}, do.localWriter.CreatePostSlide(p.PostID, p.Slide)
+		return dto.MutationResult{}, do.localWriter.CreatePostSlide(p.PostID, p.Slide)
 		// -----------------------------------------------------------------------
 
 	case TaskCreateTopicSummary:
@@ -264,9 +292,30 @@ func (do *DataOrch) executeInternalMutation(task WriteTask) (dto.MutationResult,
 		}
 		return dto.MutationResult{}, do.localWriter.CreatePostSlide(p.TopicID, p.Slide)
 
+	case TaskDeleteRss:
+		id, ok := task.Payload.(int64)
+		if !ok {
+			return dto.MutationResult{}, unexpectedPayload(task)
+		}
+		return dto.MutationResult{}, do.dbWriter.DeleteRss(id)
+
+	case TaskDeleteTopic:
+		id, ok := task.Payload.(int64)
+		if !ok {
+			return dto.MutationResult{}, unexpectedPayload(task)
+		}
+		return dto.MutationResult{}, do.dbWriter.DeleteTopic(id)
+
+	case TaskDeletePost:
+		id, ok := task.Payload.(int64)
+		if !ok {
+			return dto.MutationResult{}, unexpectedPayload(task)
+		}
+		return dto.MutationResult{}, do.dbWriter.DeletePost(id)
+
 	default:
 		return dto.MutationResult{}, unexpectedPayload(task)
-		
+
 	}
 }
 

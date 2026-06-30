@@ -13,10 +13,8 @@ import (
 // The orchestrator only needs the live *sql.DB handle, keeping it decoupled
 // from the concrete wrapper type.
 type SQLAccessor interface {
-
 	GetDB() *sql.DB
 }
-
 
 // ---------------------------------------------------------------------------
 // Task types
@@ -37,12 +35,18 @@ const (
 	TaskCreateTopicSlide   TaskType = "CREATE_TOPIC_SLIDE"
 )
 
+// Delete task types
+const (
+	TaskDeleteRss   TaskType = "delete_rss"
+	TaskDeleteTopic TaskType = "delete_topic"
+	TaskDeletePost  TaskType = "delete_post"
+)
 
 type WriteTask struct {
-	Type    TaskType
-	Payload any // concrete dto.* type; each case asserts the expected type
+	Type       TaskType
+	Payload    any // concrete dto.* type; each case asserts the expected type
 	ResultChan chan dto.MutationResult
-	ErrChan chan error
+	ErrChan    chan error
 }
 type UpdatePostTitlePayload struct {
 	PostID int64
