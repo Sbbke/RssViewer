@@ -96,3 +96,11 @@ func (s *RssService) SubmitRssUrl(ctx context.Context, rssURL string) (dto.RssIt
 	}
 	return rssResult, nil
 }
+
+func (s *RssService) RemoveRss(id int64) error{
+	err := s.orch.DeleteRss(id)
+	if err != nil{
+		return fmt.Errorf("error during rss deletion: %v", err)
+	}
+	return nil
+}

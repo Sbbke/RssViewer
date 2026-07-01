@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"RssViewer/internal/dto"
+	"RssViewer/internal/model"
 	"RssViewer/internal/service"
 	"RssViewer/internal/storage"
 	"context"
@@ -43,65 +44,25 @@ func NewFakeDB(db *sql.DB) *FakeAccessor {
 }
 
 func testOrch(t *testing.T) *storage.DataOrch {
+    t.Helper()
 
-	t.Helper()
-	db, err := sql.Open("sqlite3", ":memory:")
+    db, err := sql.Open("sqlite3", ":memory:")
+    if err != nil {
+        t.Fatalf("open: %v", err)
+    }
+    t.Cleanup(func() { db.Close() })
 
-	if err != nil {
-		t.Fatalf("open: memory : %v", err)
-	}
+    if err := model.ApplySchema(db); err != nil {
+        t.Fatalf("apply schema: %v", err)
+    }
 
-	t.Cleanup(func() { db.Close() })
-
-	if _, err := db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
-		t.Fatalf("enable foreign keys: %v", err)
-	}
-
-	schema := `
-CREATE TABLE topic (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    name       TEXT     NOT NULL UNIQUE,
-    created_at DATETIME NOT NULL
-);
-
-CREATE TABLE rss (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    title      TEXT     NOT NULL,
-    xml        BLOB,
-    url        TEXT     NOT NULL,
-    created_at DATETIME NOT NULL
-);
-
-CREATE TABLE rss_topics (
-    rss_id   INTEGER NOT NULL REFERENCES rss(id) ON DELETE CASCADE,
-    topic_id INTEGER NOT NULL REFERENCES topic(id) ON DELETE CASCADE,
-    PRIMARY KEY (rss_id, topic_id) -- Prevents duplicate entries of the same link
-);
-		CREATE TABLE post (
-			id           INTEGER PRIMARY KEY AUTOINCREMENT,
-			source_id    INTEGER NOT NULL REFERENCES rss(id) ON DELETE CASCADE,
-			title        TEXT    NOT NULL,
-			url          TEXT    NOT NULL,
-			content TEXT NOT NULL,
-			created_at   DATETIME NOT NULL,
-			published_at DATETIME NOT NULL
-		);
-
-
-
-	`
-	if _, err := db.Exec(schema); err != nil {
-		t.Fatalf("create schema: %v", err)
-	}
-
-	testTmpDir := t.TempDir()
-	tempDB := NewFakeDB(db)
-	orch, err := storage.NewDataOrch(tempDB, testTmpDir)
-	if err != nil {
-		t.Fatalf("unable to initialize db")
-	}
-	return orch
+    orch, err := storage.NewDataOrch(NewFakeDB(db), t.TempDir())
+    if err != nil {
+        t.Fatalf("new orch: %v", err)
+    }
+    return orch
 }
+
 
 // seed inserts one topic → one rss → one post and returns their IDs.
 // Used by tests that need existing rows without caring about the insert itself.
