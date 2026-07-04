@@ -1,4 +1,5 @@
-package  meta
+package meta
+
 import (
 	"database/sql"
 	"errors"

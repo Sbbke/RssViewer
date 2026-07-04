@@ -37,11 +37,24 @@ const (
 
 // Delete task types
 const (
-	TaskDeleteRss   TaskType = "delete_rss"
-	TaskDeleteTopic TaskType = "delete_topic"
-	TaskDeletePost  TaskType = "delete_post"
+	TaskDeleteRss   TaskType = "DELETE_RSS"
+	TaskDeleteTopic TaskType = "DELETE_TOPIC"
+	TaskDeletePost  TaskType = "DELETE_POST"
+	TaskDeleteTopicSummary TaskType = "DELETE_TOPIC_SUMMARY"
+	TaskDeletePostSummary TaskType = "DELETE_POST_SUMMARY"
+	TaskDeleteTopicSlide TaskType = "DELETE_TOPIC_SLIDE"
+	TaskDeletePostSlide TaskType = "DELETE_POST_SLIDE"
 )
 
+const(
+	TaskUpdateRss TaskType = "UPDATE_RSS"
+	TaskUpdatePost TaskType = "UPDATE_POST"
+	TaskUpdateTopic TaskType = "UPDATE_TOPIC"
+	TaskUpdateTopicSummary TaskType = "UPDATE_TOPIC_SUMMARY"
+	TaskUpdatePostSummary TaskType = "UPDATE_POST_SUMMARY"
+	TaskUpdateTopicSlide TaskType = "UPDATE_TOPIC_SLIDE"
+	TaskUpdatePostSlide TaskType = "UPDATE_POST_SLIDE"
+)
 type WriteTask struct {
 	Type       TaskType
 	Payload    any // concrete dto.* type; each case asserts the expected type

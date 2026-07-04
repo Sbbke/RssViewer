@@ -1,12 +1,14 @@
-package meta 
+package meta
 
 import (
+	"RssViewer/internal/model"
 	"database/sql"
 	"errors"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"os"
 	"path/filepath"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type SqliteDb struct {
@@ -18,7 +20,7 @@ func (s *SqliteDb) GetDB() *sql.DB {
 	return s.Db
 }
 
-func initDB(dbPath string) (*SqliteDb, error) {
+func InitDB(dbPath string) (*SqliteDb, error) {
 	if dbPath == "" {
 		return nil, errors.New("database path configuration must not be empty")
 	}
@@ -49,6 +51,9 @@ func initDB(dbPath string) (*SqliteDb, error) {
 	// Allowing open connections here unlocks true parallel performance for non-blocking WAL reads.
 	db.SetMaxOpenConns(100)
 	db.SetMaxIdleConns(10)
-
+	if err := model.ApplySchema(db); err != nil {
+		_ = db.Close()
+		return nil, err
+	}
 	return &SqliteDb{Db: db}, nil
 }

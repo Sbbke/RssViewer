@@ -1,4 +1,4 @@
-package  meta
+package meta
 
 import (
 	"database/sql"
@@ -65,7 +65,7 @@ func (w *DBWriter) CreateRss(payload dto.RssPayload) (dto.MutationResult, error)
 	m := rssPayloadToModel(payload)
 
 	const q = `INSERT INTO rss ( title, url, xml, created_at) VALUES (?, ?, ?, ?)`
-	res, err := w.db.Exec(q,  m.Title, m.Url, m.Xml, m.CreatedAt)
+	res, err := w.db.Exec(q, m.Title, m.Url, m.Xml, m.CreatedAt)
 	if err != nil {
 		return dto.MutationResult{}, fmt.Errorf("CreateRss: %w", err)
 	}
@@ -104,7 +104,7 @@ func (w *DBWriter) CreatePost(payload dto.PostPayload) (dto.MutationResult, erro
 	const q = `
 		INSERT INTO post (source_id, title, url, content, created_at, published_at)
 		VALUES (?, ?, ?, ?, ?, ?)`
-	res, err := w.db.Exec(q, m.RssID, m.Title, m.Url,m.Content, m.CreatedAt, m.PublishedAt)
+	res, err := w.db.Exec(q, m.RssID, m.Title, m.Url, m.Content, m.CreatedAt, m.PublishedAt)
 	if err != nil {
 		return dto.MutationResult{}, fmt.Errorf("CreatePost: %w", err)
 	}
@@ -136,6 +136,7 @@ func (w *DBWriter) DeletePost(id int64) error {
 // CreatePostsBatch inserts a slice of PostPayloads in a single transaction.
 // On any failure the transaction is rolled back; no partial writes reach the DB.
 // Each MutationResult in the returned slice corresponds by index to the input payload.
+
 func (w *DBWriter) CreatePostsBatch(payloads []dto.PostPayload) (_ []dto.MutationResult, finalErr error) {
 	if len(payloads) == 0 {
 		return nil, nil
@@ -156,7 +157,7 @@ func (w *DBWriter) CreatePostsBatch(payloads []dto.PostPayload) (_ []dto.Mutatio
 	const q = `
 		INSERT INTO post (source_id, title, url, content, created_at, published_at)
 		VALUES (?, ?, ?, ?, ?, ?)`
-	
+
 	stmt, err := tx.Prepare(q)
 	if err != nil {
 		return nil, fmt.Errorf("CreatePostsBatch: prepare statement layout: %w", err)
@@ -173,12 +174,11 @@ func (w *DBWriter) CreatePostsBatch(payloads []dto.PostPayload) (_ []dto.Mutatio
 	for _, p := range payloads {
 		// Convert DTO layer structural elements down to Model domain values
 		m := postPayloadToModel(p)
-		
+
 		// Fallback timestamp generation validations
 		if m.CreatedAt.IsZero() {
 			m.CreatedAt = now
 		}
-		
 
 		// 2. FIXED: Explicitly provide all 6 bound input parameter rows including content
 		res, execErr := stmt.Exec(m.RssID, m.Title, m.Url, m.Content, m.CreatedAt, m.PublishedAt)
@@ -204,6 +204,74 @@ func (w *DBWriter) CreatePostsBatch(payloads []dto.PostPayload) (_ []dto.Mutatio
 	return results, nil
 }
 
+// summary
+func (w *DBWriter) CreatePostSummary(p dto.SummaryPayload) (dto.MutationResult, error) {
+    const q = `
+        INSERT INTO post_summary (post_id, body, created_at, updated_at)
+        VALUES (?, ?, ?, ?)`
+    now := time.Now()
+    res, err := w.db.Exec(q, p.ID, p.Content, now, now)
+    if err != nil {
+        return dto.MutationResult{}, fmt.Errorf("CreatePostSummary: %w", err)
+    }
+    id, err := res.LastInsertId()
+    if err != nil {
+        return dto.MutationResult{}, fmt.Errorf("CreatePostSummary: retrieve id: %w", err)
+    }
+    return dto.MutationResult{GeneratedID: id}, nil
+}
+
+func (w *DBWriter) UpdatePostSummary(p dto.SummaryPayload) error {
+    const q = `UPDATE post_summary SET body = ?, updated_at = ? WHERE post_id = ?`
+    res, err := w.db.Exec(q, p.Content, time.Now(), p.ID)
+    if err != nil {
+        return fmt.Errorf("UpdatePostSummary: %w", err)
+    }
+    return requireOneRow(res, "UpdatePostSummary", p.ID)
+}
+
+func (w *DBWriter) DeletePostSummary(postID int64) error {
+    const q = `DELETE FROM post_summary WHERE post_id = ?`
+    res, err := w.db.Exec(q, postID)
+    if err != nil {
+        return fmt.Errorf("DeletePostSummary: %w", err)
+    }
+    return requireOneRow(res, "DeletePostSummary", postID)
+}
+
+func (w *DBWriter) CreateTopicSummary(p dto.SummaryPayload) (dto.MutationResult, error) {
+    const q = `
+        INSERT INTO topic_summary (topic_id, body, created_at, updated_at)
+        VALUES (?, ?, ?, ?)`
+    now := time.Now()
+    res, err := w.db.Exec(q, p.ID, p.Content, now, now)
+    if err != nil {
+        return dto.MutationResult{}, fmt.Errorf("CreateTopicSummary: %w", err)
+    }
+    id, err := res.LastInsertId()
+    if err != nil {
+        return dto.MutationResult{}, fmt.Errorf("CreateTopicSummary: retrieve id: %w", err)
+    }
+    return dto.MutationResult{GeneratedID: id}, nil
+}
+
+func (w *DBWriter) UpdateTopicSummary(p dto.SummaryPayload) error {
+    const q = `UPDATE topic_summary SET body = ?, updated_at = ? WHERE topic_id = ?`
+    res, err := w.db.Exec(q, p.ID, time.Now(), p.Content)
+    if err != nil {
+        return fmt.Errorf("UpdateTopicSummary: %w", err)
+    }
+    return requireOneRow(res, "UpdateTopicSummary", p.ID)
+}
+
+func (w *DBWriter) DeleteTopicSummary(topicID int64) error {
+    const q = `DELETE FROM topic_summary WHERE topic_id = ?`
+    res, err := w.db.Exec(q, topicID)
+    if err != nil {
+        return fmt.Errorf("DeleteTopicSummary: %w", err)
+    }
+    return requireOneRow(res, "DeleteTopicSummary", topicID)
+}
 // ---------------------------------------------------------------------------
 // Private mappers — DTO → model
 //
@@ -222,7 +290,7 @@ func rssPayloadToModel(p dto.RssPayload) model.RSSModel {
 	return model.RSSModel{
 		Title:     p.Title,
 		Url:       p.Url,
-		Xml: p.Xml,
+		Xml:       p.Xml,
 		CreatedAt: time.Now(),
 	}
 }
@@ -232,7 +300,7 @@ func postPayloadToModel(p dto.PostPayload) model.PostModel {
 		RssID:       p.RssID,
 		Title:       p.Title,
 		Url:         p.Url,
-		Content: p.Content,
+		Content:     p.Content,
 		CreatedAt:   time.Now(),
 		PublishedAt: p.PublishedAt,
 	}
