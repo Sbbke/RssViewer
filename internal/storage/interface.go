@@ -35,7 +35,6 @@ const (
 	TaskCreateTopicSlide   TaskType = "CREATE_TOPIC_SLIDE"
 )
 
-// Delete task types
 const (
 	TaskDeleteRss   TaskType = "DELETE_RSS"
 	TaskDeleteTopic TaskType = "DELETE_TOPIC"
@@ -55,12 +54,14 @@ const(
 	TaskUpdateTopicSlide TaskType = "UPDATE_TOPIC_SLIDE"
 	TaskUpdatePostSlide TaskType = "UPDATE_POST_SLIDE"
 )
+
 type WriteTask struct {
 	Type       TaskType
 	Payload    any // concrete dto.* type; each case asserts the expected type
 	ResultChan chan dto.MutationResult
 	ErrChan    chan error
 }
+
 type UpdatePostTitlePayload struct {
 	PostID int64
 	Title  string
