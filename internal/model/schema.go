@@ -35,6 +35,21 @@ type PostModel struct {
 	PublishedAt string `db:"published_at"`
 }
 
+type PostSummaryModel struct {
+    ID        int64     `db:"id"`
+    PostID    int64     `db:"post_id"`
+    Body      string    `db:"body"`
+    CreatedAt time.Time `db:"created_at"`
+}
+
+type TopicSummaryModel struct {
+    ID        int64     `db:"id"`
+    TopicID   int64     `db:"topic_id"`
+    Body      string    `db:"body"`
+    CreatedAt time.Time `db:"created_at"`
+    UpdatedAt time.Time `db:"updated_at"`
+}
+
 const SchemaSQL = `
 PRAGMA journal_mode=WAL;
 PRAGMA foreign_keys=ON;
@@ -68,6 +83,21 @@ CREATE TABLE IF NOT EXISTS post (
     content      TEXT    NOT NULL,
     created_at   DATETIME NOT NULL,
     published_at DATETIME NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS topic_summary (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    topic_id   INTEGER NOT NULL UNIQUE REFERENCES topic(id) ON DELETE CASCADE,
+    body       TEXT    NOT NULL,
+    created_at DATETIME NOT NULL,
+);
+
+CREATE TABLE IF NOT EXISTS post_summary (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id    INTEGER NOT NULL UNIQUE REFERENCES post(id) ON DELETE CASCADE,
+    body       TEXT    NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
 );
 `
 
