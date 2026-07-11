@@ -77,9 +77,14 @@ func (do *DataOrch) DB() *sql.DB {
 	return do.dbAcessor.GetDB()
 }
 
+// /tasks/ taskA.go
+// 	/ taskB.go // concreute implementation 
+// 	
 // ---------------------------------------------------------------------------
 // Worker loop — single goroutine, serializes all writes
 // ---------------------------------------------------------------------------
+
+
 func (do *DataOrch) AddTopic(p dto.TopicPayload) (dto.MutationResult, error) {
 
 	task := WriteTask{
