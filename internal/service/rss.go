@@ -2,27 +2,25 @@ package service
 
 import (
 	"RssViewer/internal/dto"
+	"RssViewer/internal/processor"
 	"RssViewer/internal/storage"
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 	"time"
-
-	"github.com/mmcdole/gofeed"
 )
 
 type RssService struct {
 	orch   *storage.DataOrch
 	client *http.Client
-	parser *gofeed.Parser
+	processor *processor.RssProcessor
 }
 
 func NewRssService(orch *storage.DataOrch) *RssService {
 	return &RssService{
 		orch:   orch,
 		client: &http.Client{Timeout: 10 * time.Second},
-		parser: gofeed.NewParser(),
+		processor: processor.NewRssProcessor(),
 	}
 }
 
@@ -39,62 +37,46 @@ func (s *RssService) SubmitRssUrl(ctx context.Context, rssURL string) (dto.RssIt
 		return dto.RssItem{}, fmt.Errorf("rss service: network fetch failed for %s: %w", rssURL, err)
 	}
 	defer resp.Body.Close()
-
 	if resp.StatusCode != http.StatusOK {
 		return dto.RssItem{}, fmt.Errorf("rss service: server returned non-200 status: %d", resp.StatusCode)
 	}
-	respBody := resp.Body
-	// 2. Parse raw XML content into structured entities
-	feed, err := s.parser.Parse(respBody)
+
+	// 2. Register feed shell first to get the DB-generated ID
+	//    Title is unknown until after parsing, so we do a two-phase write:
+	//    persist URL now, update title after processing.
+	mutation, err := s.orch.AddRss(dto.RssPayload{Url: rssURL})
 	if err != nil {
-		return dto.RssItem{}, fmt.Errorf("rss service: failed to parse XML document feed: %w", err)
+		return dto.RssItem{}, fmt.Errorf("rss service: register feed: %w", err)
 	}
-	body, err := io.ReadAll(respBody)
+
+	// 3. Process — parse XML and build post payloads stamped with the real ID
+	rssUpdate, posts, err := s.processor.Run(resp.Body, mutation.GeneratedID)
 	if err != nil {
-		return dto.RssItem{}, fmt.Errorf("error parsing resp body")
-	}
-	// 3. Register the newly verified feed metadata source in your database via the orchestrator
-	rssSourceInfo := dto.RssPayload{
-		Title: feed.Title,
-		Url:   rssURL,
-		Xml:   body,
+		return dto.RssItem{}, fmt.Errorf("rss service: process feed: %w", err)
 	}
 
-	mutationResult, err := s.orch.AddRss(rssSourceInfo)
-	if err != nil {
-		return dto.RssItem{}, fmt.Errorf("rss service: failed to preserve feed registration: %w", err)
+	// 4. Patch the feed row with title + raw XML now that we have them
+
+	if err := s.orch.UpdateRss(rssUpdate); err != nil {
+		return dto.RssItem{}, fmt.Errorf("rss service: update feed metadata: %w", err)
 	}
 
-	// 4. Transform gofeed native items into your system's data layer DTO payload array
-	postPayloads := make([]dto.PostPayload, 0, len(feed.Items))
-	for _, item := range feed.Items {
-		publishedTime := time.Now()
-		if item.PublishedParsed != nil {
-			publishedTime = *item.PublishedParsed
-		}
-
-		postPayloads = append(postPayloads, dto.PostPayload{
-			RssID:       mutationResult.GeneratedID, // Map the newly created identity constraint
-			Title:       item.Title,
-			Url:         item.Link,
-			Content:     item.Description,
-			PublishedAt: publishedTime.Format(time.RFC3339),
-		})
-	}
-
-	// 5. Submit the array to the single-writer database channel queue
-	if len(postPayloads) > 0 {
-		if err := s.orch.AddPostBatch(postPayloads); err != nil {
-			return dto.RssItem{}, fmt.Errorf("rss service: transaction processing batch allocation failed: %w", err)
+	// 5. Persist posts
+	if len(posts) > 0 {
+		if err := s.orch.AddPostBatch(posts); err != nil {
+			return dto.RssItem{}, fmt.Errorf("rss service: persist posts: %w", err)
 		}
 	}
-	subscribedTime := time.Now()
-	rssResult := dto.RssItem{
-		ID:           mutationResult.GeneratedID,
-		Title:        rssSourceInfo.Title,
-		SubscribedAt: subscribedTime,
-	}
-	return rssResult, nil
+
+	return dto.RssItem{
+		ID:           mutation.GeneratedID,
+		Title:        rssUpdate.Body.Title,
+		SubscribedAt: time.Now(),
+	}, nil
+}
+
+func (s *RssService) CheckUpdate() error{
+	return nil
 }
 
 func (s *RssService) RemoveRss(id int64) error{
@@ -104,3 +86,4 @@ func (s *RssService) RemoveRss(id int64) error{
 	}
 	return nil
 }
+

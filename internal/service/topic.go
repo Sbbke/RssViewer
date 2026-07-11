@@ -47,3 +47,13 @@ func (s *TopicService) CreateTopic(name string) (dto.TopicResponse, error){
 
 	return r, err
 }
+
+
+func (s *TopicService) DeleteTopic(id int64) error{
+
+	err := s.orch.DeleteTopic(id)
+	if err != nil{
+		return fmt.Errorf("error during topic deletion:%w",err)
+	}
+	return nil
+}

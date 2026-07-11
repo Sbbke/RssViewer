@@ -12,3 +12,4 @@ func (s *BriefingService) GetLatestBriefing(ctx context.Context, topicID int64) 
 func (s *BriefingService) GenerateBriefing(ctx context.Context, targetID int64, targetType string) error {
 	return nil
 }
+
