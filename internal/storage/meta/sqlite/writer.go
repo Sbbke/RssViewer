@@ -272,6 +272,7 @@ func (w *DBWriter) DeleteTopicSummary(topicID int64) error {
     }
     return requireOneRow(res, "DeleteTopicSummary", topicID)
 }
+
 // ---------------------------------------------------------------------------
 // Private mappers — DTO → model
 //
