@@ -62,6 +62,8 @@ Handle read activities relating to topic
 return every topics store in the system 
 - GetTopicResponse: <br>
 return the ID(s) of rss(s) of a topic
+- DeleteTopic: <br>
+delete given topic id
 
 ### Rss
 Handle required functionalities to render content from rss
@@ -69,6 +71,10 @@ Handle required functionalities to render content from rss
 return all posts from a RSS
 - CheckUpdate(): <br>
 actively check if the publisher have new posts, if so then update the local rss to the new one.
+- SubmitRssUrl: <br>
+with given rss url, crawl raw xml, then pocess and save corresponding posts meta into db.
+- RemoveRss(): <br>
+delete given rss.
 
 ### Posts
 Handle the posts of a RSS.
@@ -76,6 +82,8 @@ Handle the posts of a RSS.
 Return the raw text content of a post. First try to fetch from DB(either local file path or postgress, definately not SQLite), if it doesn't appears in DB, then call processor to fetch and process the html, save raw text content to DB, if every succesful, then try to read from DB.
 - CheckUpdate(): <br>
 Actively check the posts, compare it to the rss, if there is an update then re-run the process logic.
+- DeletePost(): <br>
+With given post id, delete it from db
 
 ## Processor
 
@@ -146,14 +154,13 @@ Functional grouping:
     ├── local.go
     ├── local_test.go
     └── sql.go
-
 Technology grouping:
 ├── interface.go
 ├── orchestrate.go
-├──local
+├──local images
     ├── reader.go
 │   └── writer.go
-├── sql
+├── sql meta
     ├── writer.go
     └── reader.go
 ```
