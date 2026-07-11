@@ -2,14 +2,15 @@ package dto
 
 import "time"
 
+
 type BriefingSlideResponse struct {
 	Slides    []string  `json:"slides"` // Generated asset paths
-	CreatedAt time.Time `json:"createdAt"`
+	CreatedAt string `json:"createdAt"`
 }
 
 type BriefingTextResponse struct {
 	Body      string    `json:"body"`
-	CreatedAt time.Time `json:"createdAt"`
+	CreatedAt string `json:"createdAt"`
 }
 
 type TopicAllInOne struct {
@@ -17,7 +18,7 @@ type TopicAllInOne struct {
     Rss       []RssDetailResponse `json:"rss"`
     Summary   *BriefingTextResponse `json:"summary"`
     Slide     *BriefingSlideResponse `json:"slide"`
-    CreatedAt time.Time           `json:"createdAt"`
+    CreatedAt string `json:"createdAt"`
 }
 
 type TopicResponse struct {
@@ -26,7 +27,7 @@ type TopicResponse struct {
 	Name string `json:"name"`
 	Summary   *BriefingTextResponse `json:"summary"`   // Inline pointer: nil means "not generated yet"
 	SummaryID int64                 `json:"summaryId"` 
-	CreatedAt time.Time             `json:"createdAt"`
+	CreatedAt string `json:"createdAt"`
 }
 
 type RssItem struct {
@@ -48,7 +49,8 @@ type RssDetailResponse struct{
 type PostItem struct {
 	ID          int64     `json:"id"`
 	Title       string    `json:"title"`
-	PublishedAt time.Time `json:"publishedAt"`
+    	Content     string                `json:"content"`
+	PublishedAt string `json:"publishedAt"`
 }
 
 type PostSummaryResponse struct {
@@ -59,45 +61,45 @@ type PostSummaryResponse struct {
 type PostDetailResponse struct {
     ID          int64                 `json:"id"`
     Title       string                `json:"title"`
-    PublishedAt time.Time             `json:"publishedAt"`
+    PublishedAt string`json:"publishedAt"`
     Content     string                `json:"content"`
     Summary     *BriefingTextResponse `json:"summary,omitempty"`
     Slide       *BriefingSlideResponse `json:"slide,omitempty"`
 }
 
+type SummaryPayload struct{
+	ID int64
+	Content string
+}
 type TopicPayload struct {
 	Name string
-}
-
-type TopicSummaryPayload struct{
-	TopicID int64
-	Body string
 }
 
 type TopicSlidePayload struct{
 	TopicID int64
 	Slide [][]byte
+	RssHash string
 }
-
 
 type RssPayload struct {
-	TopicID int64
+
 	Title   string
 	Url     string
-	Content string
+	Xml []byte 
 }
 
+type RssUpdatePayload struct{
+	Id int64
+	Body RssPayload
+}
 type PostPayload struct {
 	RssID       int64
 	Title       string
 	Url         string
-	PublishedAt time.Time
+	Content string
+	PublishedAt string
 }
 
-type PostSummaryPayload struct{
-	PostID int64
-	Body string
-}
 
 type PostSlidePayload struct{
 	PostID int64
