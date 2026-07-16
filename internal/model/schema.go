@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS topic_summary (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     topic_id   INTEGER NOT NULL UNIQUE REFERENCES topic(id) ON DELETE CASCADE,
     body       TEXT    NOT NULL,
-    created_at DATETIME NOT NULL,
+    created_at DATETIME NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS post_summary (
