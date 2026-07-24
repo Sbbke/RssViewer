@@ -87,10 +87,11 @@ func (r *DBReader) GetTopicWithRss(id int64) (dto.TopicResponse, error) {
 
 func (r *DBReader) GetRssByTopic(topicID int64) ([]dto.RssItem, error) {
 	const q = `
-		SELECT id, title, created_at
-		FROM rss
-		WHERE topic_id = ?
-		ORDER BY created_at DESC`
+		SELECT r.id, r.title, r.created_at
+		FROM rss r
+		JOIN rss_topics rt ON rt.rss_id = r.id
+		WHERE rt.topic_id = ?
+		ORDER BY r.created_at DESC`
 
 	rows, err := r.db.Query(q, topicID)
 	if err != nil {
