@@ -28,3 +28,61 @@
   left: 15px;
   z-index: 100; /* Keeps it above the sidebar */
 }
+
+.sidebar-error {
+    color: #d33;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    margin: 4px 0;
+}
+
+.topic-empty {
+    color: #888;
+    font-size: 0.85rem;
+    padding: 6px 8px;
+}
+
+.topic-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.topic-delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #999;
+    font-size: 0.8rem;
+}
+.topic-delete-btn:hover {
+    color: #d33;
+}
+
+.topic-add-section {
+    margin-top: 8px;
+    padding: 0 8px;
+}
+
+.topic-add-btn {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    padding: 6px 8px;
+    cursor: pointer;
+}
+
+.topic-add-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.topic-add-form input {
+    padding: 4px 6px;
+}
+.topic-add-actions {
+    display: flex;
+    gap: 6px;
+}

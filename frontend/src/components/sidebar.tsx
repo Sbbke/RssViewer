@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { GetTopics } from '../../wailsjs/go/main/App';
+import { GetTopics, CreateTopic, DeleteTopic } from '../../wailsjs/go/main/App';
 import type { dto } from '../../wailsjs/go/models';
-import TopicMenu from './topic_menu'; // Updated import to point to TopicMenu component
+import TopicMenu from './topic_menu';
 import './sidebar.css';
 
 function Sidebar() {
