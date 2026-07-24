@@ -13,6 +13,23 @@ function Sidebar() {
     const [newTopicName, setNewTopicName] = useState('');
     const [creating, setCreating] = useState(false);
 
+const [topicToDelete, setTopicToDelete] = useState<{ id: number; name: string } | null>(null);
+
+const confirmDeleteTopic = () => {
+    if (!topicToDelete) return;
+
+    DeleteTopic(topicToDelete.id)
+        .then(() => {
+            setTopics((prev) => prev.filter((t) => t.topicId !== topicToDelete.id));
+            setError('');
+            setTopicToDelete(null); // Close modal
+        })
+        .catch((err) => {
+            console.error("Error deleting topic:", err);
+            setError(typeof err === 'string' ? err : err?.message || 'Failed to delete topic');
+            setTopicToDelete(null);
+        });
+};
     useEffect(() => {
         loadTopics();
     }, []);
@@ -91,7 +108,7 @@ function Sidebar() {
                             <TopicMenu topicId={t.topicId} topic={t.name} />
                             <button
                                 className="topic-delete-btn"
-                                onClick={() => handleDeleteTopic(t.topicId)}
+                                onClick={() => setTopicToDelete({ id: t.topicId, name: t.name })}
                                 aria-label={`Delete ${t.name}`}
                             >
                                 ✕
@@ -100,6 +117,28 @@ function Sidebar() {
                     ))}
                 </ul>
 
+{topicToDelete && (
+    <div className="modal-overlay">
+        <div className="modal-content">
+            <h3>Confirm Deletion</h3>
+            <p>Are you sure you want to delete <strong>{topicToDelete.name}</strong>?</p>
+            <div className="modal-actions">
+                <button 
+                    className="btn-cancel" 
+                    onClick={() => setTopicToDelete(null)}
+                >
+                    Cancel
+                </button>
+                <button 
+                    className="btn-danger" 
+                    onClick={confirmDeleteTopic}
+                >
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+)}
                 <div className="topic-add-section">
                     {isAdding ? (
                         <form className="topic-add-form" onSubmit={handleCreateTopic}>
