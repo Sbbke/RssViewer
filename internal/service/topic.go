@@ -11,6 +11,14 @@ type TopicService struct{
 	orch *storage.DataOrch
 }
 
+
+
+func NewTopicService(orch *storage.DataOrch) *TopicService{
+	return &TopicService{
+		orch:   orch,
+	}
+}
+
 // return all the topics 
 func (s *TopicService) GetTopics() ( []dto.TopicResponse,  error) {
 	rows, err := s.orch.GetReader().GetTopics()
