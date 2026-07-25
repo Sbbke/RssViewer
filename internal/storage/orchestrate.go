@@ -543,7 +543,7 @@ func (do *DataOrch) executeInternalMutation(task WriteTask) (dto.MutationResult,
 		if !ok {
 			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		return dto.MutationResult{}, do.dbWriter.UpdateRss(p.Id,p.Body)
+		return dto.MutationResult{}, do.dbWriter.UpdateRss(p.ID,p.Body)
 
 	default:
 		return dto.MutationResult{}, unexpectedPayload(task)
