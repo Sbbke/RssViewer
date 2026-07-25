@@ -46,3 +46,10 @@ WriteJob {
 The Orchestrator manages the data layer workers by enforcing a strict single-writer-at-a-time invariant. All mutating write tasks submitted to DataOrch enter a centralized worker queue. The Orchestrator runs an internal background loop to pull tasks sequentially from this queue, dispatching them to the correct writer sub-module depending on the specific task type.
 
 In contrast, the read path is far simpler: the system comfortably handles multiple concurrent reads executing simultaneously, regardless of whether they hit the SQL database or the local filesystem blocks. However, to ensure total system consistency, we must explicitly design safeguards to handle edge cases involving "write-after-read" scenarios or handling concurrent writes while a long-running read operation is still active.
+
+## Rss and Topic
+The execution flow of the application is ambigious, The schema's rss_topics is a many-to-many junction table, but RssService.SubmitRssUrl only calls s.orch.AddRss(...) — it never inserts into rss_topics. So after calling SubmitRssUrl, the new feed exists in rss but is orphaned; it won't show up under any topic's GetTopicWithRss. May need either:
+
+    - a topicID parameter threaded through SubmitRssUrl → orch.AddRss (or a follow-up call) that inserts the rss_topics row, or
+    - a separate LinkRssToTopic(rssID, topicID) method on the service/orch, called right after submission.
+
