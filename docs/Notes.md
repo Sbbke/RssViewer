@@ -53,3 +53,12 @@ The execution flow of the application is ambigious, The schema's rss_topics is a
     - a topicID parameter threaded through SubmitRssUrl → orch.AddRss (or a follow-up call) that inserts the rss_topics row, or
     - a separate LinkRssToTopic(rssID, topicID) method on the service/orch, called right after submission.
 
+
+## Design: Layer seggregation
+The separation of service layer and data layer is a good design in terms of role separation, adding orchestrator to control the number of write task should enable the future design, such as multiple db. However, this design add unessosery complexity to the application, especially during wrtier function implementation. To implement a writer function, it requires multiple step where files from different layers are involved:
+1. Add the task constant (/internal/storage/interface.go)
+2. Writer method (/internal/storage/meta/sqlite/writer.go)
+3. Orchetrator method (/internal/storage/orchestrate.go)
+4. (possible) Add required payload (/internal/dto/payload.go) 
+5. Dispatch in **executeInternalMutation** (/internal/storage/orchestrate.go)
+6. Exposed API function (app.go)
