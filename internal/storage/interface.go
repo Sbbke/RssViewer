@@ -34,6 +34,7 @@ const (
 	TaskCreateTopicSummary TaskType = "CREATE_TOPIC_SUMMARY"
 	TaskCreateTopicSlide   TaskType = "CREATE_TOPIC_SLIDE"
 	TaskLinkRssTopic TaskType = "LinkRssTopic"
+	TaskUnlinkRssTopic TaskType = "UnlinkRssTopic"
 )
 
 const (

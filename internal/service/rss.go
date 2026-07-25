@@ -97,4 +97,9 @@ func (s *RssService) RemoveRss(id int64) error{
 	}
 	return nil
 }
-
+func (s *RssService) UnlinkRssFromTopic(rssID, topicID int64) error {
+	if err := s.orch.UnlinkRssTopic(rssID, topicID); err != nil {
+		return fmt.Errorf("rss service: unlink topic: %w", err)
+	}
+	return nil
+}

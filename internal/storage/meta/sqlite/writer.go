@@ -280,7 +280,14 @@ func (w *DBWriter) LinkRssTopic(rssID, topicID int64) error{
 	}
 	return nil
 }
- 
+
+ func (w *DBWriter) UnlinkRssTopic(rssID, topicID int64) error {
+	const q = `DELETE FROM rss_topics WHERE rss_id = ? AND topic_id = ?`
+	if _, err := w.db.Exec(q, rssID, topicID); err != nil {
+		return fmt.Errorf("UnlinkRssTopic rss=%d topic=%d: %w", rssID, topicID, err)
+	}
+	return nil
+}
 // ---------------------------------------------------------------------------
 // Private mappers — DTO → model
 //

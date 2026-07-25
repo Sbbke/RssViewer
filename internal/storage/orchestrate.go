@@ -345,6 +345,15 @@ func (do *DataOrch) LinkRssTopic(rssID, topicID int64) error{
 	return <-task.ErrChan
 }
 
+func (do *DataOrch) UnlinkRssTopic(rssID, topicID int64) error {
+	task := WriteTask{
+		Type:    TaskUnlinkRssTopic,
+		Payload: dto.LinkRssTopicPayload{RssID: rssID, TopicID: topicID},
+		ErrChan: make(chan error, 1),
+	}
+	do.SubmitWrite(task)
+	return <-task.ErrChan
+}
 
 func (do *DataOrch) runWorker() {
 	defer close(do.done)
@@ -561,6 +570,12 @@ case TaskLinkRssTopic:
 		return dto.MutationResult{}, unexpectedPayload(task)
 	}
 	return dto.MutationResult{}, do.dbWriter.LinkRssTopic(p.RssID, p.TopicID)
+case TaskUnlinkRssTopic:
+	p, ok := task.Payload.(dto.LinkRssTopicPayload)
+	if !ok {
+		return dto.MutationResult{}, unexpectedPayload(task)
+	}
+	return dto.MutationResult{}, do.dbWriter.UnlinkRssTopic(p.RssID, p.TopicID)
 	default:
 		return dto.MutationResult{}, unexpectedPayload(task)
 
