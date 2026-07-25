@@ -55,7 +55,7 @@ func (r *RssProcessor) Run(body io.Reader, rssID int64) (dto.RssUpdatePayload, [
 	}
 
 	nr := dto.RssUpdatePayload{
-		Id: rssID,
+		ID: rssID,
 		Body: rp,
 	}
 
