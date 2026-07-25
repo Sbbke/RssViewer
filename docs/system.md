@@ -3,6 +3,8 @@ This is a ducument for describing system architecture in a structred way in natu
 
 The system is devided into Three layer: Frontent (UI/Client) Layer, Service Layer and Data Layer.
 Frontend communicate with backend through Service Layer, then Service Layer interact with data through Data Layer.
+
+
 ## Data Objects Design
 ### Local Storage  
 - **Summary** <br>
