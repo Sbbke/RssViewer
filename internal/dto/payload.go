@@ -113,3 +113,8 @@ type MutationResult struct {
 	GeneratedID int64  `json:"generatedId"`
 	Err         string `json:"err,omitempty"` // String error message for JS compatibility
 }
+
+type LinkRssTopicPayload struct {
+	RssID   int64
+	TopicID int64
+}
