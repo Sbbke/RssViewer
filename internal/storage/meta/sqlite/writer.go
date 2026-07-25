@@ -273,6 +273,14 @@ func (w *DBWriter) DeleteTopicSummary(topicID int64) error {
     return requireOneRow(res, "DeleteTopicSummary", topicID)
 }
 
+func (w *DBWriter) LinkRssTopic(rssID, topicID int64) error{
+	const q = `INSERT INTO rss_topics (rss_id, topic_id) VALUES (?, ?)`
+	if _, err := w.db.Exec(q, rssID, topicID); err != nil {
+		return fmt.Errorf("LinkRssTopic rss=%d topic=%d: %w", rssID, topicID, err)
+	}
+	return nil
+}
+ 
 // ---------------------------------------------------------------------------
 // Private mappers — DTO → model
 //

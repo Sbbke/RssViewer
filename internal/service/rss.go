@@ -25,7 +25,7 @@ func NewRssService(orch *storage.DataOrch) *RssService {
 }
 
 // ReceiveRssFromFrontend orchestrates the external HTTP fetch, parsing, and pipeline submission
-func (s *RssService) SubmitRssUrl(ctx context.Context, rssURL string) (dto.RssItem, error) {
+func (s *RssService) SubmitRssUrl(ctx context.Context, rssURL string, topicID *int64) (dto.RssItem, error) {
 	// 1. Perform network I/O tasks entirely outside the database write loop to prevent pipeline blocking
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rssURL, nil)
 	if err != nil {
@@ -67,6 +67,11 @@ func (s *RssService) SubmitRssUrl(ctx context.Context, rssURL string) (dto.RssIt
 			return dto.RssItem{}, fmt.Errorf("rss service: persist posts: %w", err)
 		}
 	}
+	if topicID != nil {
+		if err := s.orch.LinkRssTopic(mutation.GeneratedID, *topicID); err != nil {
+			return dto.RssItem{}, fmt.Errorf("rss service: link topic: %w", err)
+		}
+	}
 
 	return dto.RssItem{
 		ID:           mutation.GeneratedID,
@@ -75,6 +80,12 @@ func (s *RssService) SubmitRssUrl(ctx context.Context, rssURL string) (dto.RssIt
 	}, nil
 }
 
+func (s *RssService) LinkRssToTopic(rssID, topicID int64) error {
+	if err := s.orch.LinkRssTopic(rssID, topicID); err != nil {
+		return fmt.Errorf("rss service: link topic: %w", err)
+	}
+	return nil
+}
 func (s *RssService) CheckUpdate() error{
 	return nil
 }

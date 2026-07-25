@@ -335,6 +335,17 @@ func (do *DataOrch) DeletePostSummary(id int64) error{
 	return <- task.ErrChan
 }
 
+func (do *DataOrch) LinkRssTopic(rssID, topicID int64) error{
+	task:= WriteTask{
+		Type: TaskLinkRssTopic,
+		Payload: dto.LinkRssTopicPayload{RssID: rssID, TopicID: topicID},
+		ErrChan: make(chan error, 1),
+	}
+	do.SubmitWrite(task)
+	return <-task.ErrChan
+}
+
+
 func (do *DataOrch) runWorker() {
 	defer close(do.done)
 	for task := range do.taskCh {
@@ -544,7 +555,12 @@ func (do *DataOrch) executeInternalMutation(task WriteTask) (dto.MutationResult,
 			return dto.MutationResult{}, unexpectedPayload(task)
 		}
 		return dto.MutationResult{}, do.dbWriter.UpdateRss(p.ID,p.Body)
-
+case TaskLinkRssTopic:
+	p, ok := task.Payload.(dto.LinkRssTopicPayload)
+	if !ok {
+		return dto.MutationResult{}, unexpectedPayload(task)
+	}
+	return dto.MutationResult{}, do.dbWriter.LinkRssTopic(p.RssID, p.TopicID)
 	default:
 		return dto.MutationResult{}, unexpectedPayload(task)
 

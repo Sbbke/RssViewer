@@ -33,6 +33,7 @@ const (
 	TaskCreatePostSlide    TaskType = "CREATE_POST_SLIDE"   // primary write: local png(s)
 	TaskCreateTopicSummary TaskType = "CREATE_TOPIC_SUMMARY"
 	TaskCreateTopicSlide   TaskType = "CREATE_TOPIC_SLIDE"
+	TaskLinkRssTopic TaskType = "LinkRssTopic"
 )
 
 const (
