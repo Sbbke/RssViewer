@@ -61,11 +61,6 @@ func (a *App) DeleteTopic(id int64) error {
 	return a.topicService.DeleteTopic(id)
 }
 
-// SubmitRssUrl fetches, parses, and persists an RSS feed from the given URL.
-func (a *App) SubmitRssUrl(rssURL string) (dto.RssItem, error) {
-	return a.rssService.SubmitRssUrl(a.ctx, rssURL)
-}
-
 // CheckRssUpdate checks all subscribed feeds for new posts.
 func (a *App) CheckRssUpdate() error {
 	return a.rssService.CheckUpdate()
@@ -74,6 +69,14 @@ func (a *App) CheckRssUpdate() error {
 // RemoveRss deletes an RSS feed by ID.
 func (a *App) RemoveRss(id int64) error {
 	return a.rssService.RemoveRss(id)
+}
+func (a *App) SubmitRssUrl(rssURL string, topicID *int64) (dto.RssItem, error) {
+	return a.rssService.SubmitRssUrl(a.ctx, rssURL, topicID)
+}
+
+// LinkRssToTopic associates an existing feed with a topic.
+func (a *App) LinkRssToTopic(rssID, topicID int64) error {
+	return a.rssService.LinkRssToTopic(rssID, topicID)
 }
 func setupOrch() *storage.DataOrch {
 	if err := os.MkdirAll("temp", 0755); err != nil {
