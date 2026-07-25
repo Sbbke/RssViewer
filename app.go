@@ -78,6 +78,9 @@ func (a *App) SubmitRssUrl(rssURL string, topicID *int64) (dto.RssItem, error) {
 func (a *App) LinkRssToTopic(rssID, topicID int64) error {
 	return a.rssService.LinkRssToTopic(rssID, topicID)
 }
+func (a *App) UnlinkRssFromTopic(rssID, topicID int64) error {
+	return a.rssService.UnlinkRssFromTopic(rssID, topicID)
+}
 func setupOrch() *storage.DataOrch {
 	if err := os.MkdirAll("temp", 0755); err != nil {
 		log.Fatalf("error creating temp dir: %v", err)
