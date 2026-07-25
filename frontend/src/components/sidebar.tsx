@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GetTopics, CreateTopic, DeleteTopic } from '../../wailsjs/go/main/App';
+import { GetTopics, CreateTopic, DeleteTopic, SubmitRssUrl } from '../../wailsjs/go/main/App';
 import type { dto } from '../../wailsjs/go/models';
 import TopicMenu from './topic_menu';
 import './sidebar.css';
@@ -14,7 +14,9 @@ function Sidebar() {
     const [creating, setCreating] = useState(false);
 
 const [topicToDelete, setTopicToDelete] = useState<{ id: number; name: string } | null>(null);
-
+    const [isAddingStandaloneRss, setIsAddingStandaloneRss] = useState(false);
+    const [standaloneRssUrl, setStandaloneRssUrl] = useState('');
+    const [submittingStandalone, setSubmittingStandalone] = useState(false);
 const confirmDeleteTopic = () => {
     if (!topicToDelete) return;
 
@@ -30,6 +32,26 @@ const confirmDeleteTopic = () => {
             setTopicToDelete(null);
         });
 };
+    const handleAddStandaloneRss = (e: React.FormEvent) => {
+        e.preventDefault();
+        const url = standaloneRssUrl.trim();
+        if (!url || submittingStandalone) return;
+
+        setSubmittingStandalone(true);
+        setError('');
+        // null topicId => standalone feed, not linked to any topic
+        SubmitRssUrl(url, null)
+            .then(() => {
+                setStandaloneRssUrl('');
+                setIsAddingStandaloneRss(false);
+                // Note: nothing in the sidebar currently lists standalone feeds —
+                // you'll want a "GetStandaloneRss" query + a section here to show them.
+            })
+            .catch((err) => {
+                setError(typeof err === 'string' ? err : err?.message || 'Failed to add feed');
+            })
+            .finally(() => setSubmittingStandalone(false));
+    };
     useEffect(() => {
         loadTopics();
     }, []);
@@ -139,6 +161,46 @@ const confirmDeleteTopic = () => {
         </div>
     </div>
 )}
+
+            <div className="standalone-rss-section">
+                {isAddingStandaloneRss ? (
+                    <form className="rss-add-form" onSubmit={handleAddStandaloneRss}>
+                        <input
+                            type="url"
+                            autoFocus
+                            value={standaloneRssUrl}
+                            onChange={(e) => setStandaloneRssUrl(e.target.value)}
+                            placeholder="https://example.com/feed.xml"
+                            disabled={submittingStandalone}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Escape') {
+                                    setIsAddingStandaloneRss(false);
+                                    setStandaloneRssUrl('');
+                                }
+                            }}
+                        />
+                        <div className="rss-add-actions">
+                            <button type="submit" disabled={submittingStandalone || !standaloneRssUrl.trim()}>
+                                {submittingStandalone ? 'Adding...' : 'Add'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => { setIsAddingStandaloneRss(false); setStandaloneRssUrl(''); }}
+                                disabled={submittingStandalone}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                ) : (
+                    <button
+                        className="rss-add-btn"
+                        onClick={() => setIsAddingStandaloneRss(true)}
+                    >
+                        + Add standalone RSS
+                    </button>
+                )}
+            </div>
                 <div className="topic-add-section">
                     {isAdding ? (
                         <form className="topic-add-form" onSubmit={handleCreateTopic}>
