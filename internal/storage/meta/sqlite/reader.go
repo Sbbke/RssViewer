@@ -137,6 +137,35 @@ func (r *DBReader) GetRssByID(rssID int64) (dto.RssResponse, error) {
 	}, nil
 }
 
+func (r *DBReader) GetAllRss() ([]dto.RssItem, error){
+	const q = `
+		SELECT id, title, created_at FROM rss
+	`
+	rows, err := r.db.Query(q)
+	if err != nil {
+		return nil, fmt.Errorf("datalayer.GetAllRss: %w", err)
+	}
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Printf("failed to close rows: %v",err)
+		}
+	}()
+
+	var rss []dto.RssItem
+
+	for rows.Next(){
+		m, err := scanRss(rows)
+		if err != nil{
+			return nil, fmt.Errorf("GetRss: %w", err)
+		}
+		rss = append(rss, rssModelToItem(m))
+	}
+	if err := rows.Err(); err != nil{
+		return nil , fmt.Errorf("GetTopics: rows: %w", err)
+	}
+	return rss, nil
+}
+
 // GetRssURL returns the raw XML feed URL for a given RSS ID.
 // Used by the crawler (CheckUpdate) to know where to fetch the remote feed.
 // Returns a plain string — no DTO wrapper needed for a single scalar value.

@@ -103,3 +103,46 @@ func (s *RssService) UnlinkRssFromTopic(rssID, topicID int64) error {
 	}
 	return nil
 }
+
+// GetAllRss returns every RSS feed, regardless of topic linkage.
+func (s *RssService) GetAllRss() ([]dto.RssItem, error) {
+	items, err := s.orch.GetReader().GetAllRss()
+	if err != nil {
+		return nil, fmt.Errorf("rss service: getAllRss: %w", err)
+	}
+	return items, nil
+}
+
+// GetStandaloneRss returns feeds that are not linked to any topic.
+// Composed entirely from existing reader methods: fetch every topic,
+// union the rss IDs linked to each, then diff against the full rss set.
+func (s *RssService) GetStandaloneRss() ([]dto.RssItem, error) {
+	all, err := s.orch.GetReader().GetAllRss()
+	if err != nil {
+		return nil, fmt.Errorf("rss service: getStandaloneRss: all rss: %w", err)
+	}
+
+	topics, err := s.orch.GetReader().GetTopics()
+	if err != nil {
+		return nil, fmt.Errorf("rss service: getStandaloneRss: topics: %w", err)
+	}
+
+	linked := make(map[int64]struct{})
+	for _, t := range topics {
+		rssForTopic, err := s.orch.GetReader().GetRssByTopic(t.TopicID)
+		if err != nil {
+			return nil, fmt.Errorf("rss service: getStandaloneRss: rss for topic %d: %w", t.TopicID, err)
+		}
+		for _, r := range rssForTopic {
+			linked[r.ID] = struct{}{}
+		}
+	}
+
+	standalone := make([]dto.RssItem, 0, len(all))
+	for _, r := range all {
+		if _, ok := linked[r.ID]; !ok {
+			standalone = append(standalone, r)
+		}
+	}
+	return standalone, nil
+}
