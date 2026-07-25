@@ -1,59 +1,39 @@
-import { useState, useEffect } from 'react';
-import { GetTopics, CreateTopic, DeleteTopic, SubmitRssUrl } from '../../wailsjs/go/main/App';
+import React, { useState, useEffect } from 'react';
 import type { dto } from '../../wailsjs/go/models';
 import TopicMenu from './topic_menu';
 import './sidebar.css';
+import { 
+    GetTopics, 
+    CreateTopic, 
+    DeleteTopic, 
+    SubmitRssUrl, 
+    GetStandaloneRss, 
+    RemoveRss 
+} from '../../wailsjs/go/main/App';
 
 function Sidebar() {
+    // Sidebar visibility state
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [topics, setTopics] = useState<dto.TopicResponse[]>([]);
     const [error, setError] = useState<string>('');
 
-    const [isAdding, setIsAdding] = useState(false);
+    // Topics state
+    const [topics, setTopics] = useState<dto.TopicResponse[]>([]);
+    const [isAddingTopic, setIsAddingTopic] = useState(false);
     const [newTopicName, setNewTopicName] = useState('');
-    const [creating, setCreating] = useState(false);
+    const [creatingTopic, setCreatingTopic] = useState(false);
+    const [topicToDelete, setTopicToDelete] = useState<{ id: number; name: string } | null>(null);
 
-const [topicToDelete, setTopicToDelete] = useState<{ id: number; name: string } | null>(null);
+    // Standalone RSS state
+    const [standaloneRss, setStandaloneRss] = useState<dto.RssItem[]>([]);
     const [isAddingStandaloneRss, setIsAddingStandaloneRss] = useState(false);
     const [standaloneRssUrl, setStandaloneRssUrl] = useState('');
     const [submittingStandalone, setSubmittingStandalone] = useState(false);
-const confirmDeleteTopic = () => {
-    if (!topicToDelete) return;
+    const [rssToDelete, setRssToDelete] = useState<{ id: number; title: string } | null>(null);
 
-    DeleteTopic(topicToDelete.id)
-        .then(() => {
-            setTopics((prev) => prev.filter((t) => t.topicId !== topicToDelete.id));
-            setError('');
-            setTopicToDelete(null); // Close modal
-        })
-        .catch((err) => {
-            console.error("Error deleting topic:", err);
-            setError(typeof err === 'string' ? err : err?.message || 'Failed to delete topic');
-            setTopicToDelete(null);
-        });
-};
-    const handleAddStandaloneRss = (e: React.FormEvent) => {
-        e.preventDefault();
-        const url = standaloneRssUrl.trim();
-        if (!url || submittingStandalone) return;
-
-        setSubmittingStandalone(true);
-        setError('');
-        // null topicId => standalone feed, not linked to any topic
-        SubmitRssUrl(url, null)
-            .then(() => {
-                setStandaloneRssUrl('');
-                setIsAddingStandaloneRss(false);
-                // Note: nothing in the sidebar currently lists standalone feeds —
-                // you'll want a "GetStandaloneRss" query + a section here to show them.
-            })
-            .catch((err) => {
-                setError(typeof err === 'string' ? err : err?.message || 'Failed to add feed');
-            })
-            .finally(() => setSubmittingStandalone(false));
-    };
+    // Fetch initial data on mount
     useEffect(() => {
         loadTopics();
+        loadStandaloneRss();
     }, []);
 
     const loadTopics = () => {
@@ -68,41 +48,89 @@ const confirmDeleteTopic = () => {
             });
     };
 
+    const loadStandaloneRss = () => {
+        GetStandaloneRss()
+            .then((data: dto.RssItem[]) => setStandaloneRss(data ?? []))
+            .catch((err) => {
+                console.error("Error loading standalone rss:", err);
+                setError(typeof err === 'string' ? err : err?.message || 'Failed to load feeds');
+            });
+    };
+
+    // Topic handlers
     const handleCreateTopic = (e: React.FormEvent) => {
         e.preventDefault();
         const name = newTopicName.trim();
-        if (!name || creating) return;
+        if (!name || creatingTopic) return;
 
-        setCreating(true);
+        setCreatingTopic(true);
         CreateTopic(name)
             .then((created: dto.TopicResponse) => {
                 setTopics((prev) => [...prev, created]);
                 setNewTopicName('');
-                setIsAdding(false);
+                setIsAddingTopic(false);
                 setError('');
             })
             .catch((err) => {
                 console.error("Error creating topic:", err);
                 setError(typeof err === 'string' ? err : err?.message || 'Failed to create topic');
             })
-            .finally(() => setCreating(false));
+            .finally(() => setCreatingTopic(false));
     };
 
-    const handleDeleteTopic = (topicId: number) => {
-        DeleteTopic(topicId)
+    const confirmDeleteTopic = () => {
+        if (!topicToDelete) return;
+
+        DeleteTopic(topicToDelete.id)
             .then(() => {
-                setTopics((prev) => prev.filter((t) => t.topicId !== topicId));
+                setTopics((prev) => prev.filter((t) => t.topicId !== topicToDelete.id));
                 setError('');
+                setTopicToDelete(null);
             })
             .catch((err) => {
                 console.error("Error deleting topic:", err);
                 setError(typeof err === 'string' ? err : err?.message || 'Failed to delete topic');
+                setTopicToDelete(null);
             });
     };
 
-    const cancelAdd = () => {
-        setIsAdding(false);
+    const cancelAddTopic = () => {
+        setIsAddingTopic(false);
         setNewTopicName('');
+    };
+
+    // RSS handlers
+    const handleAddStandaloneRss = (e: React.FormEvent) => {
+        e.preventDefault();
+        const url = standaloneRssUrl.trim();
+        if (!url || submittingStandalone) return;
+
+        setSubmittingStandalone(true);
+        setError('');
+        SubmitRssUrl(url, null)
+            .then((item: dto.RssItem) => {
+                setStandaloneRss((prev) => [item, ...prev]);
+                setStandaloneRssUrl('');
+                setIsAddingStandaloneRss(false);
+            })
+            .catch((err) => {
+                setError(typeof err === 'string' ? err : err?.message || 'Failed to add feed');
+            })
+            .finally(() => setSubmittingStandalone(false));
+    };
+
+    const confirmDeleteRss = () => {
+        if (!rssToDelete) return;
+        RemoveRss(rssToDelete.id)
+            .then(() => {
+                setStandaloneRss((prev) => prev.filter((r) => r.id !== rssToDelete.id));
+                setError('');
+                setRssToDelete(null);
+            })
+            .catch((err) => {
+                setError(typeof err === 'string' ? err : err?.message || 'Failed to delete feed');
+                setRssToDelete(null);
+            });
     };
 
     return (
@@ -113,6 +141,7 @@ const confirmDeleteTopic = () => {
             >
                 ☰
             </button>
+
             <aside className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
                 <div className="sidebar-brand">Myapp</div>
                 <div className="sidebar-menu">
@@ -121,8 +150,9 @@ const confirmDeleteTopic = () => {
 
                 {error && <div className="sidebar-error">{error}</div>}
 
+                {/* Topics List */}
                 <ul className="topic-menu">
-                    {topics.length === 0 && !isAdding && (
+                    {topics.length === 0 && !isAddingTopic && (
                         <li className="topic-empty">No topics yet</li>
                     )}
                     {topics.map((t) => (
@@ -139,70 +169,9 @@ const confirmDeleteTopic = () => {
                     ))}
                 </ul>
 
-{topicToDelete && (
-    <div className="modal-overlay">
-        <div className="modal-content">
-            <h3>Confirm Deletion</h3>
-            <p>Are you sure you want to delete <strong>{topicToDelete.name}</strong>?</p>
-            <div className="modal-actions">
-                <button 
-                    className="btn-cancel" 
-                    onClick={() => setTopicToDelete(null)}
-                >
-                    Cancel
-                </button>
-                <button 
-                    className="btn-danger" 
-                    onClick={confirmDeleteTopic}
-                >
-                    Delete
-                </button>
-            </div>
-        </div>
-    </div>
-)}
-
-            <div className="standalone-rss-section">
-                {isAddingStandaloneRss ? (
-                    <form className="rss-add-form" onSubmit={handleAddStandaloneRss}>
-                        <input
-                            type="url"
-                            autoFocus
-                            value={standaloneRssUrl}
-                            onChange={(e) => setStandaloneRssUrl(e.target.value)}
-                            placeholder="https://example.com/feed.xml"
-                            disabled={submittingStandalone}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Escape') {
-                                    setIsAddingStandaloneRss(false);
-                                    setStandaloneRssUrl('');
-                                }
-                            }}
-                        />
-                        <div className="rss-add-actions">
-                            <button type="submit" disabled={submittingStandalone || !standaloneRssUrl.trim()}>
-                                {submittingStandalone ? 'Adding...' : 'Add'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => { setIsAddingStandaloneRss(false); setStandaloneRssUrl(''); }}
-                                disabled={submittingStandalone}
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
-                ) : (
-                    <button
-                        className="rss-add-btn"
-                        onClick={() => setIsAddingStandaloneRss(true)}
-                    >
-                        + Add standalone RSS
-                    </button>
-                )}
-            </div>
+                {/* Topic Add Section */}
                 <div className="topic-add-section">
-                    {isAdding ? (
+                    {isAddingTopic ? (
                         <form className="topic-add-form" onSubmit={handleCreateTopic}>
                             <input
                                 type="text"
@@ -210,22 +179,22 @@ const confirmDeleteTopic = () => {
                                 value={newTopicName}
                                 onChange={(e) => setNewTopicName(e.target.value)}
                                 placeholder="Topic name"
-                                disabled={creating}
+                                disabled={creatingTopic}
                                 onKeyDown={(e) => {
-                                    if (e.key === 'Escape') cancelAdd();
+                                    if (e.key === 'Escape') cancelAddTopic();
                                 }}
                             />
                             <div className="topic-add-actions">
                                 <button
                                     type="submit"
-                                    disabled={creating || !newTopicName.trim()}
+                                    disabled={creatingTopic || !newTopicName.trim()}
                                 >
-                                    {creating ? 'Adding...' : 'Add'}
+                                    {creatingTopic ? 'Adding...' : 'Add'}
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={cancelAdd}
-                                    disabled={creating}
+                                    onClick={cancelAddTopic}
+                                    disabled={creatingTopic}
                                 >
                                     Cancel
                                 </button>
@@ -234,14 +203,113 @@ const confirmDeleteTopic = () => {
                     ) : (
                         <button
                             className="topic-add-btn"
-                            onClick={() => setIsAdding(true)}
+                            onClick={() => setIsAddingTopic(true)}
                         >
                             + Add Topic
                         </button>
                     )}
                 </div>
+
+                {/* Standalone RSS Section */}
+                <div className="standalone-rss-section">
+                    <h4>Standalone Feeds</h4>
+                    <ul className="standalone-rss-list">
+                        {standaloneRss.length === 0 && (
+                            <li className="topic-empty">No standalone feeds</li>
+                        )}
+                        {standaloneRss.map((r) => (
+                            <li key={r.id} className="rss-item">
+                                <span>{r.title}</span>
+                                <button
+                                    className="rss-unlink-btn"
+                                    onClick={() => setRssToDelete({ id: r.id, title: r.title })}
+                                    aria-label={`Delete ${r.title}`}
+                                >
+                                    ✕
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+
+                    {isAddingStandaloneRss ? (
+                        <form className="rss-add-form" onSubmit={handleAddStandaloneRss}>
+                            <input
+                                type="url"
+                                autoFocus
+                                value={standaloneRssUrl}
+                                onChange={(e) => setStandaloneRssUrl(e.target.value)}
+                                placeholder="https://example.com/feed.xml"
+                                disabled={submittingStandalone}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Escape') {
+                                        setIsAddingStandaloneRss(false);
+                                        setStandaloneRssUrl('');
+                                    }
+                                }}
+                            />
+                            <div className="rss-add-actions">
+                                <button type="submit" disabled={submittingStandalone || !standaloneRssUrl.trim()}>
+                                    {submittingStandalone ? 'Adding...' : 'Add'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => { setIsAddingStandaloneRss(false); setStandaloneRssUrl(''); }}
+                                    disabled={submittingStandalone}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    ) : (
+                        <button
+                            className="rss-add-btn"
+                            onClick={() => setIsAddingStandaloneRss(true)}
+                        >
+                            + Add standalone RSS
+                        </button>
+                    )}
+                </div>
             </aside>
+
+            {/* Topic Deletion Modal */}
+            {topicToDelete && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h3>Confirm Deletion</h3>
+                        <p>Are you sure you want to delete <strong>{topicToDelete.name}</strong>?</p>
+                        <div className="modal-actions">
+                            <button 
+                                className="btn-cancel" 
+                                onClick={() => setTopicToDelete(null)}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                className="btn-danger" 
+                                onClick={confirmDeleteTopic}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* RSS Deletion Modal */}
+            {rssToDelete && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h3>Confirm Deletion</h3>
+                        <p>Delete <strong>{rssToDelete.title}</strong> permanently? This removes it everywhere, including any topics it's linked to.</p>
+                        <div className="modal-actions">
+                            <button className="btn-cancel" onClick={() => setRssToDelete(null)}>Cancel</button>
+                            <button className="btn-danger" onClick={confirmDeleteRss}>Delete</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
-    );}
+    );
+}
 
 export default Sidebar;
