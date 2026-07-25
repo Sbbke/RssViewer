@@ -81,6 +81,15 @@ func (a *App) LinkRssToTopic(rssID, topicID int64) error {
 func (a *App) UnlinkRssFromTopic(rssID, topicID int64) error {
 	return a.rssService.UnlinkRssFromTopic(rssID, topicID)
 }
+// GetAllRss returns every RSS feed, regardless of topic linkage.
+func (a *App) GetAllRss() ([]dto.RssItem, error) {
+	return a.rssService.GetAllRss()
+}
+
+// GetStandaloneRss returns feeds not linked to any topic.
+func (a *App) GetStandaloneRss() ([]dto.RssItem, error) {
+	return a.rssService.GetStandaloneRss()
+}
 func setupOrch() *storage.DataOrch {
 	if err := os.MkdirAll("temp", 0755); err != nil {
 		log.Fatalf("error creating temp dir: %v", err)
