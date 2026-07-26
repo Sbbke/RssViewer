@@ -1,0 +1,148 @@
+### Slide 1: Title Slide
+
+**Main Headline:**
+AI as a Bridge to Understanding Skin Conditions
+
+**Sub-headline:**
+Researching how AI tools help laypeople interpret, identify, and navigate dermatology concerns.
+
+**Visual Layout:**
+- Centralized title with high-quality imagery of diverse skin textures (pores, freckles, various conditions).
+- Minimalist design with Google Research branding at the bottom.
+
+**Annotations & Callouts:**
+- **Authors:** Rory Sayres and Yun Liu, Research Scientists, Google Research
+- **Date:** June 12, 2026
+
+---
+
+### Slide 2: The Gap Between Access and Understanding
+
+**Main Headline:**
+Having access to information does not guarantee ease of understanding.
+
+**Sub-headline:**
+While most people use the internet for health info, interpreting complex medical data remains a human challenge.
+
+**Visual Layout:**
+- A split-screen comparison or "Funnel" diagram.
+- **Left side (The Input):** Icons representing High Internet Usage (>50% adults) and AI Adoption (1/3 of adults).
+- **Right side (The Challenge):** A visual representation of a user looking confused at raw data vs. an organized insight.
+
+**Visual Components:**
+- Percentage Callouts: "Over 50% use internet for health"; "1 in 3 turn to AI chatbots."
+- Workflow Arrow: Access $\rightarrow$ Interpretation $\rightarrow$ Decision Making.
+
+---
+
+### Slide 3: The Dermatology Challenge
+
+**Main Headline:**
+Users often lack the specific vocabulary to search effectively.
+
+**Sub-headline:**
+Without background knowledge, users struggle to move from "visual observation" to "precise terminology."
+
+**Visual Layout:**
+- A "Before vs. After" comparison layout.
+- **Left (User Observation):** An image of a leg with red dots + Label: *"Red dots on legs"* (General).
+- **Right (Medical Terminology):** The same image + Label: *"[Palpable purpura](https://en.wikipedia.org/wiki/Palpable_purpura)"* (Specific).
+
+**Annotations & Callouts:**
+- **Key Insight:** AI bridges the gap between what we see and what experts name.
+
+---
+
+### Slide 4: Research Methodology: Evaluating Consumer Understanding
+
+**Main Headline:**
+Comparing how humans identify conditions with vs. without AI assistance.
+
+**Sub-headline:**
+A large-scale quantitative study using a three-arm randomized design to test naming accuracy and confidence.
+
+**Visual Layout:**
+- A horizontal process flow showing the 3 experimental arms:
+  1. **Negative Control:** Standard Text Search (Familiar tools).
+  2. **AI Arm:** Prototype AI Carousel (3–7 matching conditions + images/details).
+  3. **Wizard of Oz (Positive Control):** "Perfect" predictions provided by a panel of dermatologists.
+
+**Visual Components:**
+- Flowchart with 3 distinct paths converging on the result: *User Understanding.*
+
+---
+
+### Slide 5: Quantitative Results: AI Boosts Naming Accuracy
+
+**Main Headline:**
+AI assistance significantly improves condition naming and user confidence.
+
+**Sub-headline:**
+Participants using AI were nearly 3x more accurate in identifying conditions compared to standard search tools.
+
+**Visual Layout:**
+- A grouped bar chart comparing "Condition Name Guessing Accuracy."
+- **X-Axis Categories:** Control (8%), AI Arm (23%), Wizard of Oz (36%).
+
+**Data / Figures:**
+- **Willingness to guess:** 41% (Control) vs. 62% (AI).
+- **Confidence Score:** Higher in the AI arm with significantly higher overall satisfaction and reduced search time.
+
+---
+
+### Slide 6: The Challenge of "Next Steps"
+
+**Main Headline:**
+Identifying a condition is easier than deciding on the next medical action.
+
+**Sub-headline:**
+While AI helps name what it sees, users still struggle to determine if they need a home remedy or an urgent clinic visit.
+
+**Visual Layout:**
+- A comparison table showing "Accuracy of Next Steps."
+
+| Group | Accuracy % | Observation |
+| :--- | :--- | :--- |
+| **Control** | 60% | Baseline for next steps. |
+| **Wizard of Oz** | 63.5% | Slight improvement (statistically minor). |
+| **Standard AI** | No significant change | Users often suggested less urgent actions than dermatologists. |
+
+**Annotations & Callouts:**
+- **Key Takeaway:** We need better tools to help users interpret "what to do next" rather than just "what it is."
+
+---
+
+### Slide 7: Human-Centered Research in Diverse Communities
+
+**Main Headline:**
+Real-world testing reveals how diverse communities interact with skin AI.
+
+**Sub-headline:**
+A mixed-methods study involving 110 participants across four primary languages to see how people use tools for their *own* concerns.
+
+**Visual Layout:**
+- A "Grid" layout showing screenshots of the research app in 4 different languages (Spanish, Chinese, etc.).
+- Central icon representing a diverse community group and a clinician.
+
+**Annotations & Callouts:**
+- **Key Finding:** Participants relied heavily on visual pattern matching across various skin tones and severities.
+- **Clinician Feedback:** 92% found the app helpful; 86% agreed with AI predictions.
+
+---
+
+### Slide 8: Conclusions & Future Directions
+
+**Main Headline:**
+The future of dermatology search is multimodal, personalized, and human-centered.
+
+**Sub-headline:**
+Combining images and text provides a superior experience for laypeople navigating complex medical information.
+
+**Visual Layout:**
+- A "Roadmap" or "Summary Checklist" layout with three pillars:
+  1. **Textbook Examples:** Provide more visual variety to aid pattern matching.
+  2. **Actionable Specificity:** Move from general condition info $\rightarrow$ specific user query actions.
+  3. **Multimodal Approach:** Combine Image + Text for the best results.
+
+**Visual Components:**
+- Icons representing: [Image] + [Text] = [Better Understanding].
