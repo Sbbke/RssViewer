@@ -1,0 +1,40 @@
+.error-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    background: #fdecea;
+    border: 1px solid #f5c2c0;
+    color: #8a1f11;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+ 
+.error-banner-dismiss {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    font-size: 0.85rem;
+    line-height: 1;
+    padding: 2px 4px;
+}
+ 
+.spinner-tiny {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(0, 0, 0, 0.15);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+}
+ 
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

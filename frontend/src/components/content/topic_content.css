@@ -1,0 +1,33 @@
+.topic-content {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px;
+}
+ 
+.topic-content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+ 
+.topic-content-header h2 {
+    margin: 0;
+}
+ 
+.topic-content-loading,
+.topic-content-empty {
+    color: #666;
+    padding: 16px 0;
+}
+ 
+.topic-content-feed-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+ 

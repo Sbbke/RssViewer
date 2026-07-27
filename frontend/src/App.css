@@ -74,4 +74,9 @@
     background-color: rgba(255, 255, 255, 1);
 }
 
-
+.main-placeholder-hint {
+    margin-top: 12px;
+    color: #888;
+    font-size: 0.9rem;
+}
+ 

@@ -1,0 +1,33 @@
+.inline-add-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px 0;
+}
+ 
+.inline-add-form input {
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+ 
+.inline-add-actions {
+    display: flex;
+    gap: 6px;
+}
+ 
+.inline-add-actions button {
+    flex: 1;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+ 
+.inline-add-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+ 

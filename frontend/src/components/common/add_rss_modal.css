@@ -1,4 +1,27 @@
 
+
+.topic-select-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+ 
+.topic-select-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+ 
+.topic-select-btn.active {
+    background: #2b6cb0;
+    color: white;
+    font-weight: 600;
+}
+ 
 .topic-select-btn {
     display: block;
     width: 100%;
