@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { GetTopic, SubmitRssUrl, UnlinkRssFromTopic } from '../../../wailsjs/go/main/App';
 import type { dto } from '../../../wailsjs/go/models';
-import { useAsyncAction } from '../../hooks/useAsyncAction';
+import { useAsyncAction } from '../hook/UseAsyncAction';
 import ErrorBanner from '../common/ErrorBanner';
 import ConfirmModal from '../common/ConfirmModal';
 import AddRssModal from '../common/AddRssModal';
