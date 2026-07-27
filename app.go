@@ -85,7 +85,9 @@ func (a *App) UnlinkRssFromTopic(rssID, topicID int64) error {
 func (a *App) GetAllRss() ([]dto.RssItem, error) {
 	return a.rssService.GetAllRss()
 }
-
+func (a *App) GetRssDetail(rssID int64) (dto.RssResponse, error) {
+	return a.rssService.GetRssDetail(rssID)
+}
 // GetStandaloneRss returns feeds not linked to any topic.
 func (a *App) GetStandaloneRss() ([]dto.RssItem, error) {
 	return a.rssService.GetStandaloneRss()

@@ -146,3 +146,10 @@ func (s *RssService) GetStandaloneRss() ([]dto.RssItem, error) {
 	}
 	return standalone, nil
 }
+func (s *RssService) GetRssDetail(rssID int64) (dto.RssResponse, error) {
+	r, err := s.orch.GetReader().GetRssByID(rssID)
+	if err != nil {
+		return dto.RssResponse{}, fmt.Errorf("rss service: getRssDetail: rssID=%d: %w", rssID, err)
+	}
+	return r, nil
+}

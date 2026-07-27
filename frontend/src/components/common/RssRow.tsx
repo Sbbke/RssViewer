@@ -3,25 +3,26 @@ interface RssRowProps {
     onRemove: () => void;
     removing: boolean;
     removeLabel: string;
+    onSelect?: () => void;
 }
  
-function RssRow({ title, onRemove, removing, removeLabel }: RssRowProps) {
+function RssRow({ title, onRemove, removing, removeLabel, onSelect }: RssRowProps) {
     return (
-        <li className="dropdown-item rss-item">
-            <span className="rss-title" title={title}>
-                {title}
-            </span>
+        <li className="rss-row">
+            {onSelect ? (
+                <button className="rss-row-title" onClick={onSelect}>
+                    {title}
+                </button>
+            ) : (
+                <span className="rss-row-title">{title}</span>
+            )}
             <button
                 className="rss-unlink-btn"
                 onClick={onRemove}
                 disabled={removing}
                 aria-label={removeLabel}
             >
-                {removing ? (
-                    <span className="spinner-tiny" aria-hidden="true" />
-                ) : (
-                    '✕'
-                )}
+                {removing ? '...' : '✕'}
             </button>
         </li>
     );
