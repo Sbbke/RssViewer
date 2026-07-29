@@ -1,0 +1,186 @@
+/* ===========================
+   Main Content
+=========================== */
+
+.rss-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    color: #e5e7eb;
+}
+
+.rss-content h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #ffffff;
+}
+
+
+/* ===========================
+   Loading / Error
+=========================== */
+
+.content-loading,
+.content-error {
+    padding: 3rem;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.content-loading {
+    color: #9ca3af;
+}
+
+.content-error {
+    color: #ef4444;
+}
+
+
+/* ===========================
+   Post List
+=========================== */
+
+.post-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+
+/* ===========================
+   Individual Post Card
+=========================== */
+
+.post-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 1rem;
+
+    padding: 1rem 1.25rem;
+
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 12px;
+
+    transition:
+        transform .15s ease,
+        border-color .15s ease,
+        background .15s ease,
+        box-shadow .15s ease;
+}
+
+.post-list-item:hover {
+    background: #273549;
+    border-color: #60a5fa;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 24px rgba(0,0,0,.25);
+}
+
+
+/* ===========================
+   Post Title
+=========================== */
+
+.post-list-title {
+    flex: 1;
+
+    background: none;
+    border: none;
+
+    text-align: left;
+
+    font-size: 1rem;
+    font-weight: 600;
+
+    color: #f3f4f6;
+
+    cursor: pointer;
+
+    transition: color .15s ease;
+}
+
+.post-list-title:hover {
+    color: #60a5fa;
+}
+
+.post-list-title:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 3px;
+}
+
+
+/* ===========================
+   Date
+=========================== */
+
+.post-list-date {
+    flex-shrink: 0;
+
+    color: #9ca3af;
+    font-size: .875rem;
+    white-space: nowrap;
+}
+
+
+/* ===========================
+   Empty State
+=========================== */
+
+.rss-content p {
+    color: #9ca3af;
+    text-align: center;
+    padding: 2rem;
+}
+
+
+/* ===========================
+   Mobile
+=========================== */
+
+@media (max-width: 700px) {
+
+    .rss-content {
+        padding: 1rem;
+    }
+
+    .post-list-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .post-list-date {
+        margin-top: .5rem;
+    }
+
+}
+.post-list-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.post-list-title {
+    width: 100%;
+    margin-bottom: .5rem;
+}
+
+.post-list-meta {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+
+.post-list-date {
+    color: #9ca3af;
+    font-size: .875rem;
+}

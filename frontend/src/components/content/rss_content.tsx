@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { GetRssDetail } from '../../../wailsjs/go/main/App';
 import type { dto } from '../../../wailsjs/go/models';
+import "./rss_content.css"
 
 interface RssContentProps {
     rssId: number;
@@ -41,12 +42,20 @@ function RssContent({ rssId, rssTitle, onSelectPost }: RssContentProps) {
             {posts.length === 0 && <p>No posts yet.</p>}
 <ul className="post-list">
     {posts.map((p: dto.PostItem) => (
-        <li key={p.id} className="post-list-item">
-            <button className="post-list-title" onClick={() => onSelectPost(p.id, p.title)}>
-                {p.title}
-            </button>
-            <span className="post-list-date">{p.publishedAt}</span>
-        </li>
+<li key={p.id} className="post-list-item">
+    <button
+        className="post-list-title"
+        onClick={() => onSelectPost(p.id, p.title)}
+    >
+        {p.title}
+    </button>
+
+    <div className="post-list-meta">
+        <span className="post-list-date">
+            {new Date(p.publishedAt).toLocaleDateString()}
+        </span>
+    </div>
+</li>
     ))}
 </ul>
         </div>
