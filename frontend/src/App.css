@@ -1,176 +1,127 @@
-
-
-:root {
-  --gold: #d4af37;
-  --gold-light: #f5e6a3;
-  --gold-dark: #9a7b2f;
-  --gold-metallic: linear-gradient(135deg, #f5e6a3 0%, #d4af37 45%, #9a7b2f 100%);
-  --bg-dark: #0a0a0a;
-  --bg-card: rgba(20, 18, 12, 0.85);
-  --text: #f8f0d8;
-  --text-muted: #c9b87a;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background: var(--bg-dark);
-  color: var(--text);
-  font-family: "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Segoe UI", system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-
-#app {
-  height: 100vh;
-  text-align: center;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.18) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 80%, rgba(154, 123, 47, 0.12) 0%, transparent 50%),
-    var(--bg-dark);
-  overflow: hidden;
-}
+@import "./styles/tokens.css";
+@import "./styles/base.css";
+@import "./styles/components.css";
 
 #logo {
-  display: block;
-  width: min(420px, 70%);
-  height: auto;
-  aspect-ratio: 1 / 1;
-  margin: 0 auto;
-  padding: 8% 0 0;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-origin: content-box;
-  filter: drop-shadow(0 0 24px rgba(212, 175, 55, 0.45));
+    display: block;
+    width: min(420px, 70%);
+    height: auto;
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    padding: 8% 0 0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-origin: content-box;
+    filter: drop-shadow(0 0 24px rgba(212, 175, 55, 0.45));
 }
 
-.app-container {
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+#logo::after {
+    content: "";
+    display: block;
+    width: 60%;
+    height: 2px;
+    margin: 1.5rem auto 0;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.7;
 }
 
 .main-content {
-  flex: 1;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: margin-left 0.3s ease;
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: margin-left var(--transition-slow);
 }
 
-/* Result line */
+/* ---- Result line ---- */
 .result {
-  height: 28px;
-  line-height: 28px;
-  margin: 1.8rem auto 1.2rem;
-  font-size: 1.05rem;
-  letter-spacing: 0.04em;
-  color: var(--gold-light);
-  text-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+    height: 28px;
+    line-height: 28px;
+    margin: 1.8rem auto 1.2rem;
+    font-size: var(--font-size-lg);
+    letter-spacing: 0.04em;
+    color: var(--gold-light);
+    text-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
 }
 
-/* Input group */
+/* ---- Input group ---- */
 .input-box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  background: var(--bg-card);
-  padding: 14px 20px;
-  border-radius: 12px;
-  border: 1px solid rgba(212, 175, 55, 0.35);
-  box-shadow:
-    0 0 0 1px rgba(212, 175, 55, 0.1),
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-5);
+    background: var(--bg-card);
+    padding: var(--space-6) var(--space-9);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-strong);
+    box-shadow:
+        0 0 0 1px rgba(212, 175, 55, 0.1),
+        var(--shadow-md),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
 }
 
 .input-box .input {
-  border: none;
-  border-radius: 6px;
-  outline: none;
-  height: 38px;
-  line-height: 38px;
-  padding: 0 14px;
-  min-width: 220px;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text);
-  font-size: 0.95rem;
-  letter-spacing: 0.03em;
-  transition: background 0.25s ease, box-shadow 0.25s ease;
+    border: none;
+    border-radius: var(--radius-sm);
+    outline: none;
+    height: 38px;
+    line-height: 38px;
+    padding: 0 var(--space-6);
+    min-width: 220px;
+    background: var(--bg-surface);
+    color: var(--text);
+    font-size: var(--font-size-base);
+    letter-spacing: 0.03em;
+    transition: background var(--transition-slow), box-shadow var(--transition-slow);
 }
-
 .input-box .input::placeholder {
-  color: var(--text-muted);
-  opacity: 0.7;
+    color: var(--text-muted);
+    opacity: 0.7;
 }
-
 .input-box .input:hover,
 .input-box .input:focus {
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.45);
+    background: var(--bg-surface-hover);
+    box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.45);
 }
 
-/* Button */
 .input-box .btn {
-  width: 72px;
-  height: 38px;
-  line-height: 38px;
-  border-radius: 6px;
-  border: none;
-  margin: 0;
-  padding: 0 12px;
-  cursor: pointer;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: #1a1508;
-  background: var(--gold-metallic);
-  box-shadow:
-    0 2px 8px rgba(212, 175, 55, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    width: 72px;
+    height: 38px;
+    line-height: 38px;
+    border-radius: var(--radius-sm);
+    border: none;
+    margin: 0;
+    padding: 0 var(--space-5);
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-on-accent);
+    background: var(--gold-metallic);
+    box-shadow:
+        0 2px 8px rgba(212, 175, 55, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
 }
-
 .input-box .btn:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.08);
-  box-shadow:
-    0 4px 16px rgba(212, 175, 55, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+    box-shadow:
+        0 4px 16px rgba(212, 175, 55, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
-
 .input-box .btn:active {
-  transform: translateY(0);
-  filter: brightness(0.95);
+    transform: translateY(0);
+    filter: brightness(0.95);
 }
 
-/* Hint text */
 .main-placeholder-hint {
-  margin-top: 18px;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  letter-spacing: 0.04em;
-  opacity: 0.85;
+    margin-top: 18px;
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    letter-spacing: 0.04em;
+    opacity: 0.85;
 }
-
-/* Optional subtle gold underline accent under the logo area */
-#logo::after {
-  content: "";
-  display: block;
-  width: 60%;
-  height: 2px;
-  margin: 1.5rem auto 0;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  opacity: 0.7;
-}
-
-

@@ -9,37 +9,24 @@
     display: flex;
     flex-direction: column;
 
-    background:
-        linear-gradient(
-            180deg,
-            rgba(28,22,12,.97) 0%,
-            rgba(14,12,8,.96) 100%);
-
-    border-right: 1px solid rgba(212,175,55,.28);
-
-    box-shadow:
-        12px 0 40px rgba(0,0,0,.55),
-        inset -1px 0 rgba(255,255,255,.04);
-
+    background: linear-gradient(180deg, rgba(28, 22, 12, 0.97) 0%, rgba(14, 12, 8, 0.96) 100%);
+    border-right: 1px solid var(--border);
+    box-shadow: 12px 0 40px rgba(0, 0, 0, 0.55), inset -1px 0 rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(12px);
-    padding-top: 72px;   /* 42px button + 18px top + some spacing */
+    padding-top: 72px; /* 42px button + 18px top + some spacing */
     color: var(--text);
 
-    transition:
-        transform .3s ease-in-out;
+    transition: transform var(--transition-slow);
 }
 
-.sidebar.open{
-    transform:translateX(0);
+.sidebar.open {
+    transform: translateX(0);
+}
+.sidebar.closed {
+    transform: translateX(-280px);
 }
 
-.sidebar.closed{
-    transform:translateX(-280px);
-}
-
-/* =========================================
-   Toggle
-========================================= */
+/* ---- Toggle ---- */
 .mobile-toggle {
     position: fixed;
     top: 18px;
@@ -47,22 +34,18 @@
     width: 42px;
     height: 42px;
     border: none;
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     cursor: pointer;
     background: var(--gold-metallic);
-    color: #1b1608;
+    color: var(--text-on-accent);
 
-    /* Resting state – ZERO gold brim */
     transform: none;
     filter: none;
-    box-shadow:
-        0 3px 8px rgba(0, 0, 0, 0.55),   /* only dark shadow */
-        inset 0 1px rgba(255, 255, 255, 0.4);
-    transition: transform .2s ease, filter .2s ease, box-shadow .2s ease;
-    z-index: 100;
+    box-shadow: var(--shadow-sm), inset 0 1px rgba(255, 255, 255, 0.4);
+    transition: transform var(--transition-base), filter var(--transition-base), box-shadow var(--transition-base);
+    z-index: var(--z-toggle);
 }
 
-/* Strong gold glow ONLY while mouse is inside */
 .mobile-toggle.is-hovering {
     transform: translateY(-1px);
     filter: brightness(1.08);
@@ -72,7 +55,6 @@
         inset 0 1px rgba(255, 255, 255, 0.45);
 }
 
-/* Focus (keyboard) */
 .mobile-toggle:focus-visible {
     outline: 2px solid rgba(212, 175, 55, 0.7);
     outline-offset: 3px;
@@ -81,327 +63,120 @@
     outline: none;
 }
 
-
-/* =========================================
-   Error
-========================================= */
-
-.sidebar-error{
-
-    margin:10px;
-
-    padding:10px 12px;
-
-    border-radius:8px;
-
-    background:rgba(180,40,40,.15);
-
-    border:1px solid rgba(255,80,80,.25);
-
-    color:#ff8d8d;
-
-    font-size:.85rem;
+/* ---- Error ---- */
+.sidebar-error {
+    margin: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    color: var(--danger-light);
+    font-size: var(--font-size-sm);
 }
 
-/* =========================================
-   Empty
-========================================= */
-
-.topic-empty{
-
-    margin:12px;
-
-    padding:16px;
-
-    text-align:center;
-
-    border:1px dashed rgba(212,175,55,.2);
-
-    border-radius:10px;
-
-    color:var(--text-muted);
-
-    font-size:.9rem;
+/* ---- Empty ---- */
+.topic-empty {
+    margin: 12px;
+    padding: var(--space-7);
+    text-align: center;
+    border: 1px dashed rgba(212, 175, 55, 0.2);
+    border-radius: var(--radius-lg);
+    color: var(--text-muted);
+    font-size: var(--font-size-md);
 }
 
-/* =========================================
-   Topic Item
-========================================= */
-
-.topic-item{
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    margin:6px 10px;
-
-    border-radius:10px;
-
-    transition:.2s;
+/* ---- Topic Item ---- */
+.topic-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 6px 10px;
+    border-radius: var(--radius-lg);
+    transition: var(--transition-base);
 }
 
-.topic-delete-btn{
-
-    width:34px;
-    height:34px;
-
-    border:none;
-
-    background:none;
-
-    border-radius:8px;
-
-    cursor:pointer;
-
-    color:var(--text-muted);
-
-    transition:.2s;
+.topic-delete-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: var(--transition-base);
+}
+.topic-delete-btn:hover {
+    color: var(--danger-hover);
+    background: rgba(255, 80, 80, 0.08);
 }
 
-.topic-delete-btn:hover{
-
-    color:#ff8888;
-
-    background:rgba(255,80,80,.08);
+/* ---- Add Section ---- */
+.topic-add-section {
+    margin-top: auto;
+    padding: var(--space-7);
+    border-top: 1px solid var(--border-soft);
 }
 
-/* =========================================
-   Add Section
-========================================= */
-
-.topic-add-section{
-
-    margin-top:auto;
-
-    padding:16px;
-
-    border-top:1px solid rgba(212,175,55,.15);
+.topic-add-btn {
+    width: 100%;
+    padding: 10px 14px;
+    text-align: left;
+    cursor: pointer;
+    border-radius: var(--radius-lg);
+    color: var(--gold-light);
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px dashed var(--border-dashed);
+    transition: var(--transition-base);
+}
+.topic-add-btn:hover {
+    background: rgba(212, 175, 55, 0.16);
 }
 
-/* =========================================
-   Add Button
-========================================= */
-
-.topic-add-btn{
-
-    width:100%;
-
-    padding:10px 14px;
-
-    text-align:left;
-
-    cursor:pointer;
-
-    border-radius:10px;
-
-    color:var(--gold-light);
-
-    background:rgba(212,175,55,.08);
-
-    border:1px dashed rgba(212,175,55,.35);
-
-    transition:.2s;
+/* ---- Add Form ---- */
+.topic-add-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
 }
 
-.topic-add-btn:hover{
-
-    background:rgba(212,175,55,.16);
+.topic-add-form input {
+    height: 38px;
+    padding: 0 var(--space-5);
+    border: none;
+    outline: none;
+    border-radius: var(--radius-md);
+    color: var(--text);
+    background: var(--bg-surface);
+    transition: var(--transition-base);
+}
+.topic-add-form input:focus {
+    box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.45);
 }
 
-/* =========================================
-   Add Form
-========================================= */
-
-.topic-add-form{
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:10px;
+.topic-add-actions {
+    display: flex;
+    gap: var(--space-3);
 }
-
-.topic-add-form input{
-
-    height:38px;
-
-    padding:0 12px;
-
-    border:none;
-
-    outline:none;
-
-    border-radius:8px;
-
-    color:var(--text);
-
-    background:rgba(255,255,255,.06);
-
-    transition:.2s;
+.topic-add-actions button {
+    flex: 1;
+    height: 36px;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
 }
-
-.topic-add-form input:focus{
-
-    box-shadow:
-        0 0 0 1px rgba(212,175,55,.45);
-}
-
-/* =========================================
-   Actions
-========================================= */
-
-.topic-add-actions{
-
-    display:flex;
-
-    gap:8px;
-}
-
-.topic-add-actions button{
-
-    flex:1;
-
-    height:36px;
-
-    border:none;
-
-    border-radius:8px;
-
-    cursor:pointer;
-}
-
 /* Save */
-
-.topic-add-actions button:first-child{
-
-    background:var(--gold-metallic);
-
-    color:#1b1608;
-
-    font-weight:600;
+.topic-add-actions button:first-child {
+    background: var(--gold-metallic);
+    color: var(--text-on-accent);
+    font-weight: 600;
 }
-
 /* Cancel */
-
-.topic-add-actions button:last-child{
-
-    background:rgba(255,255,255,.08);
-
-    color:var(--text);
+.topic-add-actions button:last-child {
+    background: var(--bg-surface-strong);
+    color: var(--text);
 }
 
-/* =========================================
-   Modal
-========================================= */
-
-.modal-overlay{
-
-    position:fixed;
-
-    inset:0;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    background:rgba(0,0,0,.72);
-
-    backdrop-filter:blur(6px);
-
-    z-index:9999;
-}
-
-.modal-content{
-
-    min-width:340px;
-
-    max-width:460px;
-
-    padding:24px;
-
-    border-radius:16px;
-
-    background:var(--bg-card);
-
-    color:var(--text);
-
-    border:1px solid rgba(212,175,55,.25);
-
-    box-shadow:
-        0 18px 50px rgba(0,0,0,.6),
-        inset 0 1px rgba(255,255,255,.04);
-}
-
-/* =========================================
-   Modal Buttons
-========================================= */
-
-.modal-actions{
-
-    display:flex;
-
-    justify-content:flex-end;
-
-    gap:12px;
-
-    margin-top:22px;
-}
-
-.btn-cancel{
-
-    height:38px;
-
-    padding:0 16px;
-
-    border:none;
-
-    border-radius:8px;
-
-    cursor:pointer;
-
-    background:rgba(255,255,255,.08);
-
-    color:var(--text);
-
-    transition:.2s;
-}
-
-.btn-cancel:hover{
-
-    background:rgba(255,255,255,.14);
-}
-
-.btn-danger{
-
-    height:38px;
-
-    padding:0 18px;
-
-    border:none;
-
-    border-radius:8px;
-
-    cursor:pointer;
-
-    background:
-        linear-gradient(
-            180deg,
-            #e36b65,
-            #b83833);
-
-    color:white;
-
-    font-weight:600;
-
-    transition:.2s;
-}
-
-.btn-danger:hover{
-
-    filter:brightness(1.08);
-}
+/* Modal shell (.modal-overlay, .modal-content, .modal-actions)
+   and buttons (.btn-cancel, .btn-danger) now live in
+   styles/components.css — this file only had layout,
+   not the shared shell. */

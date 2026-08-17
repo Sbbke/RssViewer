@@ -1,0 +1,151 @@
+/* ===========================================
+   SHARED COMPONENTS
+   Patterns reused by 2+ components. If you're
+   about to define .btn-*, .modal-*, or a select
+   row style inside a component file, it belongs
+   here instead.
+=========================================== */
+
+/* ---- Buttons ---- */
+.btn-primary {
+    height: 38px;
+    padding: 0 16px;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-on-accent);
+    background: var(--gold-metallic);
+    box-shadow:
+        0 2px 8px rgba(212, 175, 55, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
+}
+.btn-primary:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+    box-shadow:
+        0 4px 16px rgba(212, 175, 55, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.btn-primary:active {
+    transform: translateY(0);
+    filter: brightness(0.95);
+}
+
+.btn-cancel {
+    height: 38px;
+    padding: 0 16px;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    background: var(--bg-surface-strong);
+    color: var(--text);
+    transition: background var(--transition-base);
+}
+.btn-cancel:hover {
+    background: var(--bg-surface-strong-hover);
+}
+
+.btn-danger {
+    height: 38px;
+    padding: 0 18px;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    background: var(--danger-gradient);
+    color: white;
+    font-weight: 600;
+    transition: filter var(--transition-base);
+}
+.btn-danger:hover {
+    filter: brightness(1.08);
+}
+
+.btn-primary:disabled,
+.btn-danger:disabled,
+.btn-cancel:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ---- Modal shell ----
+   Used by ConfirmModal, AddRssModal, AddTopicModal,
+   address_model.tsx. Component files should only
+   add layout rules for what goes *inside* the card. */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(6px);
+    z-index: var(--z-modal);
+}
+
+.modal-content {
+    min-width: 340px;
+    max-width: 460px;
+    padding: var(--space-9);
+    border-radius: var(--radius-2xl);
+    background: var(--bg-card);
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-lg), var(--shadow-inset-hairline);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-5);
+    margin-top: 22px;
+}
+
+/* ---- Select / list row ----
+   Canonical version. (Previously duplicated with
+   conflicting light-theme colors in add_rss_modal.css
+   — that copy has been removed; this is the only one.) */
+.topic-select-btn {
+    display: block;
+    flex: 1;
+    width: 100%;
+    padding: 11px 14px;
+    text-align: left;
+    background: none;
+    border: none;
+    border-radius: var(--radius-lg);
+    color: var(--text);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    transition: background var(--transition-base), color var(--transition-base);
+}
+.topic-select-btn:hover {
+    background: rgba(212, 175, 55, 0.12);
+}
+.topic-select-btn.active {
+    background: linear-gradient(90deg, rgba(212, 175, 55, 0.25), rgba(245, 230, 163, 0.12));
+    color: var(--gold-light);
+    box-shadow: inset 3px 0 var(--gold);
+    font-weight: 600;
+}
+
+/* ---- Spinner ---- */
+.spinner-tiny {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(212, 175, 55, 0.18);
+    border-top-color: var(--gold);
+    border-right-color: var(--gold-light);
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.35));
+}
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

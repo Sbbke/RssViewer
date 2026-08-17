@@ -3,7 +3,7 @@ import logo from './assets/images/logo-universal.png';
 import './App.css';
 import Sidebar from './components/sidebar';
 import TopicContent from './components/content/topic_content';
- 
+import GoldParticles from './components/background/GoldParticles';
 interface SelectedTopic {
     id: number;
     name: string;
@@ -13,6 +13,8 @@ function App() {
     const [selectedTopic, setSelectedTopic] = useState<SelectedTopic | null>(null);
 
    return (
+   <div id="app">
+     <GoldParticles />
         <div className="app-container">
             <Sidebar
                 selectedTopicId={selectedTopic?.id ?? null}
@@ -33,6 +35,7 @@ function App() {
                 )}
             </main>
         </div>
+    </div>
     );
 }
  

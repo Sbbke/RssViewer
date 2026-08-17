@@ -1,0 +1,68 @@
+/* ===========================================
+   BASE / RESET
+   Global element defaults. There should be
+   exactly ONE place styling html/body/#app —
+   this is it. Do not redeclare these in
+   App.css or style.css.
+=========================================== */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--bg-dark);
+    color: var(--text);
+    font-family: var(--font-family-base);
+    -webkit-font-smoothing: antialiased;
+}
+
+@font-face {
+    font-family: "Nunito";
+    font-style: normal;
+    font-weight: 400;
+    src: local(""),
+        url("../assets/fonts/nunito-v16-latin-regular.woff2") format("woff2");
+}
+
+#app {
+    height: 100vh;
+    text-align: center;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 80%, rgba(154, 123, 47, 0.12) 0%, transparent 50%),
+        var(--bg-dark);
+}
+
+.app-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 1;
+}
+
+/* ---- Default scrollbar styling ----
+   Any element that scrolls (post lists, sidebars,
+   modal bodies) should get this look automatically.
+   Apply via class="scroll-panel" rather than
+   redefining ::-webkit-scrollbar per component. */
+.scroll-panel {
+    overflow-y: auto;
+}
+.scroll-panel::-webkit-scrollbar {
+    width: 8px;
+}
+.scroll-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+.scroll-panel::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: var(--radius-md);
+}
+.scroll-panel::-webkit-scrollbar-thumb:hover {
+    background: var(--border-strong);
+}

@@ -1,139 +1,54 @@
-
-.error-banner{
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    gap:10px;
-
-    margin-bottom:12px;
-
-    padding:10px 14px;
-
-    border-radius:10px;
-
-    color:#ffd5d5;
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(70,18,18,.92),
-            rgba(42,14,14,.92));
-
-    border:1px solid rgba(220,90,90,.35);
-
-    box-shadow:
-        0 6px 18px rgba(0,0,0,.35),
-        inset 0 1px rgba(255,255,255,.04);
-
-    backdrop-filter:blur(8px);
-
-    font-size:.88rem;
-
-    animation:errorAppear .2s ease-out;
+.error-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+    padding: 10px 14px;
+    border-radius: var(--radius-lg);
+    color: #ffd5d5;
+    background: var(--danger-bg-strong);
+    border: 1px solid var(--danger-border-strong);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), var(--shadow-inset-hairline);
+    backdrop-filter: blur(8px);
+    font-size: var(--font-size-sm);
+    animation: errorAppear 0.2s ease-out;
 }
 
-/* optional left accent */
-
-.error-banner::before{
-
-    content:"";
-
-    width:4px;
-
-    align-self:stretch;
-
-    border-radius:999px;
-
-    background:
-        linear-gradient(
-            to bottom,
-            #ffb0b0,
-            #d94b4b);
+/* left accent */
+.error-banner::before {
+    content: "";
+    width: 4px;
+    align-self: stretch;
+    border-radius: 999px;
+    background: linear-gradient(to bottom, #ffb0b0, #d94b4b);
 }
 
-/* =========================================
-   Dismiss Button
-========================================= */
-
-.error-banner-dismiss{
-
-    width:28px;
-    height:28px;
-
-    border:none;
-
-    border-radius:8px;
-
-    background:none;
-
-    color:inherit;
-
-    cursor:pointer;
-
-    transition:
-        background .2s,
-        transform .15s;
+.error-banner-dismiss {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    transition: background var(--transition-base), transform var(--transition-fast);
+}
+.error-banner-dismiss:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: scale(1.05);
 }
 
-.error-banner-dismiss:hover{
-
-    background:rgba(255,255,255,.08);
-
-    transform:scale(1.05);
-}
-
-/* =========================================
-   Spinner
-========================================= */
-
-.spinner-tiny{
-
-    display:inline-block;
-
-    width:14px;
-    height:14px;
-
-    border-radius:50%;
-
-    border:2px solid rgba(212,175,55,.18);
-
-    border-top-color:var(--gold);
-
-    border-right-color:var(--gold-light);
-
-    animation:spin .7s linear infinite;
-
-    vertical-align:middle;
-
-    flex-shrink:0;
-
-    filter:drop-shadow(0 0 4px rgba(212,175,55,.35));
-}
-
-@keyframes spin{
-
-    to{
-        transform:rotate(360deg);
+@keyframes errorAppear {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
-/* =========================================
-   Banner Animation
-========================================= */
-
-@keyframes errorAppear{
-
-    from{
-        opacity:0;
-        transform:translateY(-6px);
-    }
-
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
-}
+/* .spinner-tiny + @keyframes spin moved to styles/components.css
+   since it's generic and reusable beyond this banner. */
