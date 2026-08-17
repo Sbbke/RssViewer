@@ -62,3 +62,6 @@ The separation of service layer and data layer is a good design in terms of role
 4. (possible) Add required payload (/internal/dto/payload.go) 
 5. Dispatch in **executeInternalMutation** (/internal/storage/orchestrate.go)
 6. Exposed API function (app.go)
+
+## Security
+The app is intentionally written as a vulnerable app, blindly trusting the user submit correct url and everything, no sanitization on backend service logic.
