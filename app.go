@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 // App struct
@@ -16,6 +17,7 @@ type App struct {
 	orch         *storage.DataOrch
 	topicService *service.TopicService
 	rssService *service.RssService
+	storagePath string
 }
 
 // NewApp creates a new App application struct
@@ -27,11 +29,26 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	a.prepareEnv()
 	a.orch = setupOrch()
 	a.topicService = service.NewTopicService(a.orch)
 	a.rssService = service.NewRssService(a.orch)
+
 }
 
+func (a *App) prepareEnv() {
+	requiredDirs := []string{
+		filepath.Join(a.storagePath, "rss"),
+		filepath.Join(a.storagePath, "summary", "post"),
+		filepath.Join(a.storagePath, "summary", "topic"),
+	}
+
+	for _, dir := range requiredDirs {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			log.Printf("failed to prepare local storage directory %q: %v", dir, err)
+		}
+	}
+}
 // Greet returns a greeting for the given name
 func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
