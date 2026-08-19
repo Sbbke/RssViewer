@@ -533,11 +533,7 @@ Responsible for Create / Update / Delete operations.
 Large assets are stored on disk instead of SQLite.
 
 ```
-rss/
-    {rssID}.xml
 
-post/
-    {postID}.txt
 
 summary/
     post/{postID}.txt
