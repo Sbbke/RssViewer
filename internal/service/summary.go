@@ -25,14 +25,10 @@ func NewBriefingService(orch *storage.DataOrch) *BriefingService {
 // Topic metadata and RSS/Post data are read from DBReader.
 // Generated summary/slide assets are read from LocalReader.
 //
-// NOTE:
-// The current DBReader API does not expose the rssHash required by
-// LocalReader.ReadTopicSummary/ReadTopicSlide, so topic-local assets
-// cannot be resolved completely without an additional storage API.
-func (s *BriefingService) GetLatestBriefing(
+func (s *BriefingService) GetLatestBriefingByTopic(
 	ctx context.Context,
 	topicID int64,
-) (*dto.TopicAllInOne, error) {
+) (*dto.BriefingSlideResponse, error) {
 	if err := validateContext(ctx); err != nil {
 		return nil, err
 	}
@@ -41,66 +37,26 @@ func (s *BriefingService) GetLatestBriefing(
 		return nil, err
 	}
 
-	reader := s.orch.GetReader()
+	dr := s.orch.GetReader()
+	reader := s.orch.GetLocalReader()
 	if reader == nil {
 		return nil, fmt.Errorf("database reader is not available")
 	}
-
-	topic, err := reader.GetTopicWithRss(topicID)
+	
+	tr, err := dr.GetTopicWithRss(topicID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get topic %d: %w", topicID, err)
 	}
-
-	result := &dto.TopicAllInOne{
-		TopicID:   topic.TopicID,
-		Rss:       make([]dto.RssDetailResponse, 0, len(topic.Rss)),
-		CreatedAt: time.Now().UTC().Format(time.RFC3339),
+	// [][]byte
+	slide, err := reader.ReadTopicSlide(topicID, "")
+	if err != nil{
+		return nil, fmt.Errorf("Failed to get slide for %s",tr.Name)
+	}
+	result := dto.BriefingSlideResponse{
+		Slides: slide,
 	}
 
-	// TopicResponse only contains RssItem.
-	// Expand every RSS into RssDetailResponse using DBReader.
-	for _, rss := range topic.Rss {
-		rssDetail, err := reader.GetRssByID(rss.ID)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"failed to get rss %d for topic %d: %w",
-				rss.ID,
-				topicID,
-				err,
-			)
-		}
-
-		result.Rss = append(result.Rss, dto.RssDetailResponse{
-			Info:  rssDetail.Info,
-			Posts: make([]dto.PostDetailResponse, 0, len(rssDetail.Posts)),
-		})
-
-		for _, post := range rssDetail.Posts {
-			postDetail := dto.PostDetailResponse{
-				ID:          post.ID,
-				Title:       post.Title,
-				PublishedAt: post.PublishedAt,
-				Content:     post.Content,
-			}
-
-			// Post-level generated assets are available directly by Post ID.
-			postDetail, err = s.attachPostAssets(postDetail)
-			if err != nil {
-				return nil, fmt.Errorf(
-					"failed to attach briefing assets for post %d: %w",
-					post.ID,
-					err,
-				)
-			}
-
-			result.Rss[len(result.Rss)-1].Posts = append(
-				result.Rss[len(result.Rss)-1].Posts,
-				postDetail,
-			)
-		}
-	}
-
-	return result, nil
+	return &result, nil
 }
 
 // GenerateBriefing generates a briefing for a Topic or Post.
