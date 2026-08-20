@@ -3,7 +3,7 @@ package dto
 import "time"
 
 type BriefingSlideResponse struct {
-	Slides    []string `json:"slides"` // Generated asset paths or URLs
+	Slides    [][]byte `json:"slides"` // image slides
 	CreatedAt string   `json:"createdAt"`
 }
 
@@ -65,6 +65,7 @@ type PostDetailResponse struct {
 	Summary     *BriefingTextResponse  `json:"summary,omitempty"`
 	Slide       *BriefingSlideResponse `json:"slide,omitempty"`
 }
+
 
 // ==========================================
 // REQUEST PAYLOADS (Frontend -> Go)
