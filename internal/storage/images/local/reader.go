@@ -44,6 +44,7 @@ func (r *LocalReader) ReadTopicSlide(ID int64, rssHash string) ([][]byte, error)
 
 	return r.readOrderedImagesFromDir(slideDir)
 }
+
 func (r *LocalReader) ReadPostSummary(ID int64) (string, error) {
 	targetPath := filepath.Join(r.basePath, "summary", "post", fmt.Sprintf("%d", ID), "summary.txt")
 
@@ -54,6 +55,7 @@ func (r *LocalReader) ReadPostSummary(ID int64) (string, error) {
 	return string(data), nil
 
 }
+
 func (r *LocalReader) ReadPostSlide(ID int64) ([][]byte, error) {
 	slideDir := filepath.Join(r.basePath, "summary", "post", fmt.Sprintf("%d", ID), "slide")
 

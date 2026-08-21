@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"time"
 
 	"RssViewer/internal/dto"
 	"RssViewer/internal/storage"
@@ -240,17 +239,8 @@ func (s *BriefingService) attachPostAssets(
 		return post, nil
 	}
 
-	encodedSlides := make([]string, 0, len(slides))
-
-	for _, slide := range slides {
-		encodedSlides = append(
-			encodedSlides,
-			"data:image/png;base64,"+base64.StdEncoding.EncodeToString(slide),
-		)
-	}
-
 	post.Slide = &dto.BriefingSlideResponse{
-		Slides:    encodedSlides,
+		Slides:    slides,
 		CreatedAt: "",
 	}
 
