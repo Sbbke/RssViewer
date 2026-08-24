@@ -113,6 +113,7 @@ function Sidebar({ selectedTopicId, onSelectTopic,onClearSelection }: SidebarPro
         setRssToDelete(null);
     };
  
+    
     return (
         <>
             <button
@@ -125,80 +126,87 @@ function Sidebar({ selectedTopicId, onSelectTopic,onClearSelection }: SidebarPro
             >
                 ☰
             </button>
-
+ 
             <aside className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
+                <div className="sidebar-header"
+          onClick={onClearSelection}
+          style={{ cursor: 'pointer' }} // Optional styling hint
+                >
+                    <span className="sidebar-brand">RSS Reader</span>
+                </div>
+ 
                 <ErrorBanner message={error} onDismiss={clearErrors} />
  
-                {/* Topics — click a topic to view its feeds in the main pane */}
-                <ul className="topic-menu">
-                    {!topicsLoaded && (
-                        <li className="topic-empty">
-                            <span className="spinner-tiny" aria-hidden="true" /> Loading topics…
-                        </li>
-                    )}
-                    {topicsLoaded && topics.length === 0 && !isAddingTopic && (
-                        <li className="topic-empty">No topics yet — create one below.</li>
-                    )}
-                    {topics.map((t) => (
-                        <li key={t.topicId} className="topic-item">
-                            <TopicMenu
-                                topicId={t.topicId}
-                                topic={t.name}
-                                isActive={selectedTopicId === t.topicId}
-                                onSelect={() => onSelectTopic(t.topicId, t.name)}
-                            />
-                            <button
-                                className="topic-delete-btn"
-                                onClick={() => setTopicToDelete({ id: t.topicId, name: t.name })}
-                                aria-label={`Delete ${t.name}`}
-                            >
-                                ✕
+                <div className="sidebar-body scroll-panel">
+                    {/* Topics — click a topic to view its feeds in the main pane */}
+                    <div className="sidebar-section">
+                        <p className="sidebar-section-label">Topics</p>
+                        <ul className="topic-menu">
+                            {!topicsLoaded && (
+                                <li className="topic-empty">
+                                    <span className="spinner-tiny" aria-hidden="true" /> Loading topics…
+                                </li>
+                            )}
+                            {topicsLoaded && topics.length === 0 && !isAddingTopic && (
+                                <li className="topic-empty">No topics yet — create one below.</li>
+                            )}
+                            {topics.map((t) => (
+                                <li key={t.topicId} className="topic-item">
+                                    <TopicMenu
+                                        topicId={t.topicId}
+                                        topic={t.name}
+                                        isActive={selectedTopicId === t.topicId}
+                                        onSelect={() => onSelectTopic(t.topicId, t.name)}
+                                    />
+                                    <button
+                                        className="topic-delete-btn"
+                                        onClick={() => setTopicToDelete({ id: t.topicId, name: t.name })}
+                                        aria-label={`Delete ${t.name}`}
+                                    >
+                                        ✕
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                        <div className="sidebar-add-section">
+                            <button className="topic-add-btn" onClick={() => setIsAddingTopic(true)}>
+                                + Add Topic
                             </button>
-                        </li>
-                    ))}
-                </ul>
+                        </div>
+                    </div>
  
-                <div className="topic-add-section">
-                    <button className="topic-add-btn" onClick={() => setIsAddingTopic(true)}>
-                        + Add Topic
-                    </button>
-                </div>
-                 
-                {/* Standalone RSS */}
-                <div className="standalone-rss-section">
-                    {!rssLoaded ? (
-                        <div className="standalone-rss-section">
-                            <h4>Standalone Feeds</h4>
-                            <ul className="standalone-rss-list">
+                    {/* Standalone RSS */}
+                    <div className="sidebar-section">
+                        <p className="sidebar-section-label">Standalone Feeds</p>
+                        <ul className="standalone-rss-list">
+                            {!rssLoaded && (
                                 <li className="topic-empty">
                                     <span className="spinner-tiny" aria-hidden="true" /> Loading feeds…
                                 </li>
-                            </ul>
+                            )}
+                            {rssLoaded && standaloneRss.length === 0 && (
+                                <li className="topic-empty">No standalone feeds yet.</li>
+                            )}
+                            {rssLoaded &&
+                                standaloneRss.map((r) => (
+                                    <RssRow
+                                        key={r.id}
+                                        title={r.title}
+                                        removing={removeRss.loading && rssToDelete?.id === r.id}
+                                        removeLabel={`Delete ${r.title}`}
+                                        onRemove={() => setRssToDelete({ id: r.id, title: r.title })}
+                                    />
+                                ))}
+                        </ul>
+                        <div className="sidebar-add-section">
+                            <button
+                                className="rss-add-btn"
+                                onClick={() => setIsAddingStandaloneRss(true)}
+                            >
+                                + Add standalone RSS
+                            </button>
                         </div>
-                    ) : (
-                        standaloneRss.length > 0 && (
-                            <div className="standalone-rss-section">
-                                <h4>Standalone Feeds</h4>
-                                <ul className="standalone-rss-list">
-                                    {standaloneRss.map((r) => (
-                                        <RssRow
-                                            key={r.id}
-                                            title={r.title}
-                                            removing={removeRss.loading && rssToDelete?.id === r.id}
-                                            removeLabel={`Delete ${r.title}`}
-                                            onRemove={() => setRssToDelete({ id: r.id, title: r.title })}
-                                        />
-                                    ))}
-                                </ul>
-                            </div>
-                        )
-                    )} 
-                    <button
-                        className="rss-add-btn"
-                        onClick={() => setIsAddingStandaloneRss(true)}
-                    >
-                        + Add standalone RSS
-                    </button>
+                    </div>
                 </div>
             </aside>
  
@@ -208,7 +216,7 @@ function Sidebar({ selectedTopicId, onSelectTopic,onClearSelection }: SidebarPro
                     onClose={() => setIsAddingStandaloneRss(false)}
                 />
             )}
-             {isAddingTopic && (
+            {isAddingTopic && (
                 <AddTopicModal
                     onSubmit={handleCreateTopic}
                     onClose={() => setIsAddingTopic(false)}

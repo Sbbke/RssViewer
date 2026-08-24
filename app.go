@@ -79,8 +79,8 @@ func (a *App) DeleteTopic(id int64) error {
 }
 
 // CheckRssUpdate checks all subscribed feeds for new posts.
-func (a *App) CheckRssUpdate() error {
-	return a.rssService.CheckUpdate()
+func (a *App) CheckRssUpdate(id int64) error {
+	return a.rssService.CheckUpdate(a.ctx, id)
 }
 
 // RemoveRss deletes an RSS feed by ID.

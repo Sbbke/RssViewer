@@ -3,6 +3,7 @@ package meta
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"RssViewer/internal/dto"
@@ -62,10 +63,14 @@ func (w *DBWriter) DeleteTopic(id int64) error {
 // ---------------------------------------------------------------------------
 
 func (w *DBWriter) CreateRss(payload dto.RssPayload) (dto.MutationResult, error) {
+    if strings.TrimSpace(payload.Url) == "" {
+        return dto.MutationResult{}, fmt.Errorf("CreateRss: payload URL cannot be empty")
+    }
+	fmt.Print(payload.Url)
 	m := rssPayloadToModel(payload)
-
-	const q = `INSERT INTO rss ( title, url, xml, created_at) VALUES (?, ?, ?, ?)`
-	res, err := w.db.Exec(q, m.Title, m.Url, m.Xml, m.CreatedAt)
+	fmt.Println(m.Url)
+	const q = `INSERT INTO rss ( title, xml, url, created_at) VALUES (?, ?, ?, ?)`
+	res, err := w.db.Exec(q, m.Title, m.Xml, m.Url, m.CreatedAt)
 	if err != nil {
 		return dto.MutationResult{}, fmt.Errorf("CreateRss: %w", err)
 	}
@@ -77,8 +82,8 @@ func (w *DBWriter) CreateRss(payload dto.RssPayload) (dto.MutationResult, error)
 }
 
 func (w *DBWriter) UpdateRss(id int64, payload dto.RssPayload) error {
-	const q = `UPDATE rss SET title = ?, xml = ?, url = ? WHERE id = ?`
-	res, err := w.db.Exec(q, payload.Title, payload.Xml, payload.Url, id)
+	const q = `UPDATE rss SET title = ?, xml = ? WHERE id = ?`
+	res, err := w.db.Exec(q, payload.Title, payload.Xml, id)
 	if err != nil {
 		return fmt.Errorf("UpdateRss: %w", err)
 	}
@@ -156,7 +161,9 @@ func (w *DBWriter) CreatePostsBatch(payloads []dto.PostPayload) (_ []dto.Mutatio
 	// 1. Fully aligned 6 positional argument mappings matching destination tables
 	const q = `
 		INSERT INTO post (source_id, title, url, content, created_at, published_at)
-		VALUES (?, ?, ?, ?, ?, ?)`
+		VALUES (?, ?, ?, ?, ?, ?)
+		ON CONFLICT(source_id, url) DO NOTHING
+		`
 
 	stmt, err := tx.Prepare(q)
 	if err != nil {

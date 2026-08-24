@@ -102,6 +102,20 @@
     margin-top: 22px;
 }
 
+.modal-title {
+    margin: 0 0 var(--space-5);
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--text-heading);
+}
+
+.modal-message {
+    margin: 0;
+    color: var(--text);
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+}
+
 /* ---- Select / list row ----
    Canonical version. (Previously duplicated with
    conflicting light-theme colors in add_rss_modal.css
@@ -128,6 +142,43 @@
     color: var(--gold-light);
     box-shadow: inset 3px 0 var(--gold);
     font-weight: 600;
+}
+
+/* ---- Back navigation ----
+   Use anywhere you're not on the main page (RSS view,
+   topic view) to return to it, e.g.
+   <button className="back-btn" onClick={goToMain}>
+     <ArrowLeftIcon size={16} /> Back
+   </button> */
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-shrink: 0;
+    height: 36px;
+    padding: 0 var(--space-6) 0 var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-base), border-color var(--transition-base), color var(--transition-base);
+}
+.back-btn:hover {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: var(--border-strong);
+    color: var(--gold-light);
+}
+.back-btn:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+.back-btn svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
 }
 
 /* ---- Spinner ---- */

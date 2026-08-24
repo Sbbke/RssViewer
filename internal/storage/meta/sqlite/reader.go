@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"RssViewer/internal/dto"
@@ -180,6 +181,9 @@ func (r *DBReader) GetRssURL(rssID int64) (string, error) {
 		}
 		return "", fmt.Errorf("GetRssURL %d: %w", rssID, err)
 	}
+    if strings.TrimSpace(url) == "" {
+        return "", fmt.Errorf("GetRssURL %d: source URL is empty in DB", rssID)
+    }
 	return url, nil
 }
 

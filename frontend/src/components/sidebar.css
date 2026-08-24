@@ -13,7 +13,6 @@
     border-right: 1px solid var(--border);
     box-shadow: 12px 0 40px rgba(0, 0, 0, 0.55), inset -1px 0 rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(12px);
-    padding-top: 72px; /* 42px button + 18px top + some spacing */
     color: var(--text);
 
     transition: transform var(--transition-slow);
@@ -26,10 +25,37 @@
     transform: translateX(-280px);
 }
 
+/* ---- Header / brand ----
+   Replaces the old "padding-top: 72px" hack that just
+   left dead space for the floating toggle to hover over.
+   Give the sidebar an actual header row instead; the
+   mobile toggle overlaps only this row, not the whole rail. */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    height: 72px;
+    flex-shrink: 0;
+    padding: 0 var(--space-7);
+    padding-left: 68px; /* room for .mobile-toggle without visually colliding */
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.sidebar-brand {
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--gold-light);
+    text-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* ---- Toggle ---- */
 .mobile-toggle {
     position: fixed;
-    top: 18px;
+    top: 15px;
     left: 18px;
     width: 42px;
     height: 42px;
@@ -63,6 +89,30 @@
     outline: none;
 }
 
+/* ---- Body (scrollable topic list area) ---- */
+.sidebar-body {
+    flex: 1;
+    min-height: 0; /* required for overflow to work inside a flex column */
+    overflow-y: auto;
+    padding: var(--space-5) 0;
+}
+
+.sidebar-section-label {
+    margin: 4px 16px 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    opacity: 0.75;
+}
+
+.sidebar-section + .sidebar-section {
+    margin-top: var(--space-7);
+    padding-top: var(--space-7);
+    border-top: 1px solid var(--border-soft);
+}
+
 /* ---- Error ---- */
 .sidebar-error {
     margin: 10px;
@@ -85,39 +135,73 @@
     font-size: var(--font-size-md);
 }
 
-/* ---- Topic Item ---- */
+/* ---- Topic Item ----
+   Delete button is now hidden until the row is hovered/focused,
+   so the list reads as a clean nav list rather than a row of
+   two competing buttons at all times. */
 .topic-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 6px 10px;
+    gap: var(--space-2);
+    margin: 2px 8px;
+    padding-right: 4px;
     border-radius: var(--radius-lg);
-    transition: var(--transition-base);
+    transition: background var(--transition-base);
+}
+.topic-item:hover,
+.topic-item:focus-within {
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .topic-delete-btn {
-    width: 34px;
-    height: 34px;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: none;
     background: none;
     border-radius: var(--radius-md);
     cursor: pointer;
     color: var(--text-muted);
-    transition: var(--transition-base);
+    opacity: 0;
+    transform: translateX(4px);
+    transition: opacity var(--transition-base), transform var(--transition-base), color var(--transition-base), background var(--transition-base);
+}
+.topic-item:hover .topic-delete-btn,
+.topic-item:focus-within .topic-delete-btn,
+.topic-delete-btn:focus-visible {
+    opacity: 1;
+    transform: translateX(0);
 }
 .topic-delete-btn:hover {
     color: var(--danger-hover);
-    background: rgba(255, 80, 80, 0.08);
+    background: rgba(255, 80, 80, 0.1);
 }
 
-/* ---- Add Section ---- */
-.topic-add-section {
-    margin-top: auto;
-    padding: var(--space-7);
-    border-top: 1px solid var(--border-soft);
+/* ---- List reset ---- */
+.topic-menu,
+.standalone-rss-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
-.topic-add-btn {
+/* ---- Add Section ----
+   Sits directly under each section's list now (Topics,
+   Standalone Feeds) rather than pinned to the sidebar
+   bottom — each section owns its own add affordance. */
+.sidebar-add-section {
+    padding: var(--space-3) 8px 0;
+}
+
+.topic-add-btn,
+.rss-add-btn {
     width: 100%;
     padding: 10px 14px;
     text-align: left;
@@ -126,10 +210,12 @@
     color: var(--gold-light);
     background: rgba(212, 175, 55, 0.08);
     border: 1px dashed var(--border-dashed);
-    transition: var(--transition-base);
+    transition: background var(--transition-base), border-color var(--transition-base);
 }
-.topic-add-btn:hover {
+.topic-add-btn:hover,
+.rss-add-btn:hover {
     background: rgba(212, 175, 55, 0.16);
+    border-color: var(--gold);
 }
 
 /* ---- Add Form ---- */
@@ -147,7 +233,7 @@
     border-radius: var(--radius-md);
     color: var(--text);
     background: var(--bg-surface);
-    transition: var(--transition-base);
+    transition: box-shadow var(--transition-base);
 }
 .topic-add-form input:focus {
     box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.45);
@@ -177,6 +263,5 @@
 }
 
 /* Modal shell (.modal-overlay, .modal-content, .modal-actions)
-   and buttons (.btn-cancel, .btn-danger) now live in
-   styles/components.css — this file only had layout,
-   not the shared shell. */
+   and buttons (.btn-cancel, .btn-danger) live in
+   styles/components.css — this file only has sidebar layout. */

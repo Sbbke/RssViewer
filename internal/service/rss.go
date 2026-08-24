@@ -86,10 +86,58 @@ func (s *RssService) LinkRssToTopic(rssID, topicID int64) error {
 	}
 	return nil
 }
-func (s *RssService) CheckUpdate() error{
+
+func (s *RssService) CheckUpdate(ctx context.Context, rssID int64) ( error) {
+	// 1. Load the feed's source URL.
+	existing, err := s.orch.GetReader().GetRssURL(rssID)
+	if err != nil {
+		return fmt.Errorf("rss service: checkUpdate: load feed %d: %w", rssID, err)
+	}
+	if existing == "" {
+		return  fmt.Errorf("rss service: checkUpdate: feed %d has no source url on record", rssID)
+	}
+ 
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, existing, nil)
+	if err != nil {
+		return  fmt.Errorf("rss service: checkUpdate: build request: %w", err)
+	}
+ 
+	resp, err := s.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("rss service: checkUpdate: fetch %s: %w", existing, err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("rss service: checkUpdate: server returned status %d", resp.StatusCode)
+	}
+ 
+	// 2. Parse using the same pipeline as initial subscribe, stamped
+	//    with the existing ID so posts link to the right feed row.
+	rssUpdate, posts, err := s.processor.Run(resp.Body, rssID)
+	if err != nil {
+		return fmt.Errorf("rss service: checkUpdate: process feed: %w", err)
+	}
+ 
+	// 3. Patch feed metadata — title/raw XML may have changed even if
+	//    no posts are new.
+	if err := s.orch.UpdateRss(rssUpdate); err != nil {
+		return fmt.Errorf("rss service: checkUpdate: update feed metadata: %w", err)
+	}
+ 
+	// 4. Persist posts; the DB-level (rss_id, url) uniqueness handles
+	//    dedupe, so this can safely submit the full parsed set every
+	//    time rather than pre-filtering in application code.
+	if len(posts) == 0 {
+		return nil
+	}
+
+	if  err := s.orch.AddPostBatch(posts); err != nil {
+		return fmt.Errorf("rss service: checkUpdate: persist posts: %w", err)
+	}
+ 
 	return nil
 }
-
+ 
 func (s *RssService) RemoveRss(id int64) error{
 	err := s.orch.DeleteRss(id)
 	if err != nil{
@@ -152,4 +200,9 @@ func (s *RssService) GetRssDetail(rssID int64) (dto.RssResponse, error) {
 		return dto.RssResponse{}, fmt.Errorf("rss service: getRssDetail: rssID=%d: %w", rssID, err)
 	}
 	return r, nil
+}
+
+func (s *RssService) UpdateRss(rssID int64) (dto.RssResponse, error) {
+	res := dto.RssResponse{}
+	return res, nil
 }

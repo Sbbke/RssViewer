@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 
 	"RssViewer/internal/dto"

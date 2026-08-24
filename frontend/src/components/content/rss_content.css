@@ -1,5 +1,5 @@
 /* ===========================
-   Main Content
+   Page header (title + back button)
 =========================== */
 .rss-content {
     max-width: 900px;
@@ -7,12 +7,56 @@
     padding: var(--space-9);
     color: var(--text);
 }
-.rss-content h2 {
+
+.rss-content-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    margin-bottom: var(--space-3);
+}
+
+.rss-content-header h2 {
+    margin: 0;
     font-size: var(--font-size-xl);
     font-weight: 700;
-    margin-bottom: var(--space-9);
     color: var(--text-heading);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
+.rss-content-meta {
+    margin: 0 0 var(--space-9);
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+}
+
+.refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-shrink: 0;
+    height: 36px;
+    padding: 0 var(--space-6);
+    border: 1px dashed var(--border-dashed);
+    border-radius: var(--radius-lg);
+    background: rgba(212, 175, 55, 0.08);
+    color: var(--gold-light);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-base), border-color var(--transition-base);
+    white-space: nowrap;
+}
+.refresh-btn:hover:not(:disabled) {
+    background: rgba(212, 175, 55, 0.16);
+    border-color: var(--gold);
+}
+.refresh-btn:disabled {
+    opacity: 0.7;
+    cursor: default;
+}
+
 /* ===========================
    Loading / Error
 =========================== */
@@ -28,18 +72,19 @@
 .content-error {
     color: var(--danger);
 }
+
 /* ===========================
    Scroll container
    Shows ~5 posts at a time, rest reveal on scroll.
-   Uses the shared .scroll-panel styling from base.css
-   for the scrollbar — add that class alongside this
-   one in the component, e.g.
+   Combine with the shared .scroll-panel class from
+   base.css for scrollbar styling, e.g.
    className="post-list-scroll scroll-panel"
 =========================== */
 .post-list-scroll {
-    max-height: calc(5 * 92px);
+    max-height: calc(5 * 96px);
     overflow-y: auto;
-    padding-right: 6px;
+    padding: 4px 6px 4px 2px;
+    margin: 0 -6px;
 }
 .post-list-loading-more {
     text-align: center;
@@ -47,6 +92,7 @@
     color: var(--text-muted);
     font-size: var(--font-size-sm);
 }
+
 /* ===========================
    Post List
 =========================== */
@@ -56,20 +102,25 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-4);
 }
+
 /* ===========================
    Individual Post Card
+   Lifted a step brighter than the page/sidebar background
+   (bg-surface-strong instead of bg-card, which was nearly
+   identical to the page background and disappeared into it)
 =========================== */
 .post-list-item {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-7);
-    padding: var(--space-7) 1.25rem;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
+    gap: var(--space-2);
+    padding: var(--space-6) 1.25rem;
+    background: var(--bg-surface-strong);
+    border: 1px solid var(--border-soft);
+    border-left: 3px solid transparent;
+    border-radius: var(--radius-lg);
     transition:
         transform var(--transition-fast),
         border-color var(--transition-fast),
@@ -77,22 +128,24 @@
         box-shadow var(--transition-fast);
 }
 .post-list-item:hover {
-    background: rgba(212, 175, 55, 0.08);
-    border-color: var(--border-strong);
-    transform: translateY(-2px);
+    background: rgba(212, 175, 55, 0.1);
+    border-color: var(--border);
+    border-left-color: var(--gold);
+    transform: translateX(2px);
     box-shadow: var(--shadow-card-hover);
 }
+
 /* ===========================
    Post Title
 =========================== */
 .post-list-title {
     width: 100%;
-    margin-bottom: var(--space-2);
     background: none;
     border: none;
     text-align: left;
     font-size: var(--font-size-md);
     font-weight: 600;
+    line-height: 1.4;
     color: var(--text);
     cursor: pointer;
     transition: color var(--transition-fast);
@@ -104,6 +157,7 @@
     outline: 2px solid var(--gold);
     outline-offset: 3px;
 }
+
 /* ===========================
    Meta / Date
 =========================== */
@@ -118,6 +172,7 @@
     font-size: var(--font-size-sm);
     white-space: nowrap;
 }
+
 /* ===========================
    Empty State
 =========================== */
@@ -126,6 +181,7 @@
     text-align: center;
     padding: var(--space-9);
 }
+
 /* ===========================
    Mobile
 =========================== */
@@ -134,6 +190,6 @@
         padding: var(--space-7);
     }
     .post-list-scroll {
-        max-height: calc(5 * 110px);
+        max-height: calc(5 * 114px);
     }
 }

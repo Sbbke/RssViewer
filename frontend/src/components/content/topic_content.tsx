@@ -77,10 +77,9 @@ function TopicContent({ topicId, topicName }: TopicContentProps) {
                     rssId={selectedRss.id}
                     rssTitle={selectedRss.title}
                     onSelectPost={(postId, postTitle) => {
-                        // TODO: wire to a post-detail view once one exists —
-                        // for now this is a no-op placeholder.
                         console.log('selected post', postId, postTitle);
                     }}
+                    onBack={() => setSelectedRss(null)}
                 />
             </div>
         );

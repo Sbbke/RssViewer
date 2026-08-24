@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS topic_summary (
     body       TEXT    NOT NULL,
     created_at DATETIME NOT NULL
 );
+CREATE UNIQUE INDEX IF NOT EXISTS idx_post_source_url ON post(source_id, url);
 
 CREATE TABLE IF NOT EXISTS post_summary (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
