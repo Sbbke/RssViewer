@@ -25,6 +25,13 @@
     color: var(--text-muted);
 }
 
+.posts-section-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    flex-shrink: 0;
+}
+
 .posts-filter-btn {
     flex-shrink: 0;
     height: 36px;

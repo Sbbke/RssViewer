@@ -144,6 +144,36 @@
     font-weight: 600;
 }
 
+/* ---- Refresh button ----
+   Used wherever there's a re-fetchable list (RssContent's post list,
+   PostsSection's topic posts). Shared here so both stay visually
+   consistent rather than each component defining its own copy. */
+.refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-shrink: 0;
+    height: 36px;
+    padding: 0 var(--space-6);
+    border: 1px dashed var(--border-dashed);
+    border-radius: var(--radius-lg);
+    background: rgba(212, 175, 55, 0.08);
+    color: var(--gold-light);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-base), border-color var(--transition-base);
+    white-space: nowrap;
+}
+.refresh-btn:hover:not(:disabled) {
+    background: rgba(212, 175, 55, 0.16);
+    border-color: var(--gold);
+}
+.refresh-btn:disabled {
+    opacity: 0.7;
+    cursor: default;
+}
+
 /* ---- Back navigation ----
    Use anywhere you're not on the main page (RSS view,
    topic view) to return to it, e.g.
@@ -164,8 +194,6 @@
     font-size: var(--font-size-sm);
     font-weight: 600;
     cursor: pointer;
-    margin-right: auto;
-    margin-left: 0;
     transition: background var(--transition-base), border-color var(--transition-base), color var(--transition-base);
 }
 .back-btn:hover {

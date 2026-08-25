@@ -1,23 +1,63 @@
-
 .topic-page {
     width: 100%;
     padding: var(--space-9) var(--space-7);
     color: var(--text);
 }
- 
+
 /* Deliberately NOT inside .topic-page-inner's max-width column —
    sits at the true left edge of the page (just page padding away)
    instead of being indented in with the centered content below it. */
-.topic-page-header-row{
+.topic-page-back-row {
     display: flex;
     align-items: center;
-    justify-content: space-between 
-    width: 100%;
+    justify-content: space-between;
+    margin-bottom: var(--space-6);
 }
- 
+
+.flip-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--gold-light);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background var(--transition-base), border-color var(--transition-base), transform var(--transition-base);
+}
+.flip-btn:hover {
+    background: rgba(212, 175, 55, 0.12);
+    border-color: var(--border-strong);
+    transform: rotate(45deg);
+}
+.flip-btn:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+
+/* ---- Flip mechanics ----
+   .topic-page-flip-stage holds the 3D perspective; the single child
+   .topic-page-flip-content is what actually rotates. Content is
+   swapped at the rotation's halfway point (see TopicPage.tsx) rather
+   than keeping two full faces stacked — this page's content is
+   variable-height and scrollable, so a real two-sided card would
+   need a fixed, pre-measured height for both faces to avoid clipping
+   or overlap. backface-visibility just avoids a flash of mirrored
+   content in the instant the element is edge-on to the viewer. */
+.topic-page-flip-stage {
+    perspective: 1800px;
+}
+
+.topic-page-flip-content {
+    width: 100%;
+    transition: transform 0.3s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+}
+
 .topic-page-inner {
     max-width: 900px;
     margin: 0 auto;
 }
- 
-

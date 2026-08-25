@@ -31,32 +31,8 @@
     font-size: var(--font-size-sm);
 }
 
-.refresh-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-3);
-    flex-shrink: 0;
-    height: 36px;
-    padding: 0 var(--space-6);
-    border: 1px dashed var(--border-dashed);
-    border-radius: var(--radius-lg);
-    background: rgba(212, 175, 55, 0.08);
-    color: var(--gold-light);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    cursor: pointer;
-    transition: background var(--transition-base), border-color var(--transition-base);
-    white-space: nowrap;
-    margin-left: auto;
-}
-.refresh-btn:hover:not(:disabled) {
-    background: rgba(212, 175, 55, 0.16);
-    border-color: var(--gold);
-}
-.refresh-btn:disabled {
-    opacity: 0.7;
-    cursor: default;
-}
+/* .refresh-btn now lives in styles/components.css — shared with
+   PostsSection's refresh button on the topic page. */
 
 /* ===========================
    Loading / Error

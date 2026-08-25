@@ -16,6 +16,8 @@ interface PostsSectionProps {
     posts: TopicPost[];
     onOpenPost: (postId: number) => void;
     layout?: 'list' | 'grid';
+    onRefresh?: () => void;
+    isRefreshing?: boolean;
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -48,7 +50,7 @@ function mostRecentFirst(posts: TopicPost[]): TopicPost[] {
     );
 }
 
-function PostsSection({ posts, onOpenPost, layout = 'list' }: PostsSectionProps) {
+function PostsSection({ posts, onOpenPost, layout = 'list', onRefresh, isRefreshing = false }: PostsSectionProps) {
     const [drawerOpen, setDrawerOpen] = useState(false);
     // The only filter state that actually affects what's rendered —
     // changes only land here via FilterDrawer's onApply, never live
@@ -86,12 +88,30 @@ function PostsSection({ posts, onOpenPost, layout = 'list' }: PostsSectionProps)
                             : `${displayedPosts.length} ${displayedPosts.length === 1 ? 'result' : 'results'}`}
                     </span>
                 </h2>
-                <button
-                    className={`posts-filter-btn ${filtersActive ? 'active' : ''}`}
-                    onClick={() => setDrawerOpen(true)}
-                >
-                    ⚙ Filter{filtersActive ? ' •' : ''}
-                </button>
+                <div className="posts-section-actions">
+                    {onRefresh && (
+                        <button
+                            className="refresh-btn"
+                            onClick={onRefresh}
+                            disabled={isRefreshing}
+                            aria-label="Refresh posts"
+                        >
+                            {isRefreshing ? (
+                                <>
+                                    <span className="spinner-tiny" aria-hidden="true" /> Refreshing…
+                                </>
+                            ) : (
+                                '⟳ Refresh'
+                            )}
+                        </button>
+                    )}
+                    <button
+                        className={`posts-filter-btn ${filtersActive ? 'active' : ''}`}
+                        onClick={() => setDrawerOpen(true)}
+                    >
+                        ⚙ Filter{filtersActive ? ' •' : ''}
+                    </button>
+                </div>
             </div>
 
             {displayedPosts.length === 0 && (

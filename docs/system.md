@@ -8,7 +8,7 @@ Frontend communicate with backend through Service Layer, then Service Layer inte
 ## Data Objects Design
 ### Local Storage  
 - **Summary** <br>
-Only have images slide.
+Only have images slide. The summary is now saved inside db.
 
 ```bash
 ── summary/

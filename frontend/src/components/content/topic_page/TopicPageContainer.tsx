@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { GetTopicDetail } from '../../../../wailsjs/go/main/App';
 import type { dto } from '../../../../wailsjs/go/models';
 import ErrorModal from '../../common/ErrorModal';
@@ -21,11 +21,12 @@ function TopicPageContainer({
 }: TopicPageContainerProps) {
     const [data, setData] = useState<dto.TopicAllInOne | null>(null);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState('');
 
-    useEffect(() => {
+    const fetchDetail = useCallback((showFullPageSpinner: boolean) => {
         let cancelled = false;
-        setLoading(true);
+        if (showFullPageSpinner) setLoading(true);
         setError('');
         GetTopicDetail(topicId)
             .then((result: dto.TopicAllInOne) => {
@@ -37,10 +38,23 @@ function TopicPageContainer({
                 }
             })
             .finally(() => {
-                if (!cancelled) setLoading(false);
+                if (!cancelled) {
+                    if (showFullPageSpinner) setLoading(false);
+                    else setRefreshing(false);
+                }
             });
         return () => { cancelled = true; };
     }, [topicId]);
+
+    useEffect(() => {
+        const cancel = fetchDetail(true);
+        return cancel;
+    }, [fetchDetail]);
+
+    const handleRefresh = () => {
+        setRefreshing(true);
+        fetchDetail(false);
+    };
 
     if (loading) return <div className="content-loading">Loading {topicName}…</div>;
 
@@ -57,6 +71,8 @@ function TopicPageContainer({
             data={data}
             onBack={onBack}
             onOpenPost={onOpenPost}
+            onRefresh={handleRefresh}
+            isRefreshing={refreshing}
         />
     );
 }
