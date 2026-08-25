@@ -1,0 +1,101 @@
+.filter-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    z-index: var(--z-modal);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.filter-drawer {
+    width: min(340px, 90vw);
+    height: 100vh;
+    background: var(--bg-card);
+    border-left: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-7);
+    color: var(--text);
+    animation: filterDrawerIn var(--transition-slow);
+}
+
+@keyframes filterDrawerIn {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+.filter-drawer-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: var(--space-5);
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.filter-drawer-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--text-heading);
+}
+
+.filter-drawer-count {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+}
+
+.filter-drawer-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.filter-drawer-label {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    opacity: 0.75;
+}
+
+.filter-drawer-checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    font-size: var(--font-size-base);
+    cursor: pointer;
+}
+.filter-drawer-checkbox input {
+    accent-color: var(--gold);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.filter-drawer-select {
+    height: 38px;
+    padding: 0 var(--space-5);
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    color: var(--text);
+    font-size: var(--font-size-base);
+    cursor: pointer;
+}
+
+.filter-drawer-actions {
+    margin-top: auto;
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-5);
+    padding-top: var(--space-7);
+    border-top: 1px solid var(--border-soft);
+}

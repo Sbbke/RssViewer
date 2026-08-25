@@ -1,0 +1,104 @@
+.post-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-6);
+    width: 100%;
+    padding: var(--space-6);
+    text-align: left;
+    background: var(--bg-surface-strong);
+    border: 1px solid var(--border-soft);
+    border-left: 3px solid transparent;
+    border-radius: var(--radius-lg);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+.post-card:hover {
+    background: rgba(212, 175, 55, 0.08);
+    border-color: var(--border);
+    border-left-color: var(--gold);
+    transform: translateX(2px);
+    box-shadow: var(--shadow-card-hover);
+}
+.post-card:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+
+.post-card-thumb {
+    flex-shrink: 0;
+    width: 88px;
+    height: 88px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-soft);
+}
+
+.post-card-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.post-card-title {
+    margin: 0;
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    color: var(--text-heading);
+    line-height: 1.4;
+}
+
+.post-card-excerpt {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    /* two-line clamp */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.post-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--space-2);
+}
+
+.post-card-source {
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.post-card-arrow {
+    flex-shrink: 0;
+    color: var(--gold-light);
+    font-size: var(--font-size-md);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+.post-card:hover .post-card-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+@media (max-width: 700px) {
+    .post-card-thumb {
+        width: 64px;
+        height: 64px;
+    }
+}

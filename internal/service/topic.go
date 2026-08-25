@@ -62,3 +62,71 @@ func (s *TopicService) DeleteTopic(id int64) error {
 	}
 	return nil
 }
+
+
+
+func (s *TopicService) GetTopicDetail(id int64) (dto.TopicAllInOne, error) {
+	reader := s.orch.GetReader()
+ 
+	// 1. Topic metadata.
+	topics, err := reader.GetTopics()
+	if err != nil {
+		return dto.TopicAllInOne{}, fmt.Errorf("topic service: getTopicDetail: load topics: %w", err)
+	}
+	var createdAt string
+	found := false
+	for _, t := range topics {
+		if t.TopicID == id {
+			createdAt = t.CreatedAt
+			found = true
+			break
+		}
+	}
+	if !found {
+		return dto.TopicAllInOne{}, fmt.Errorf("topic service: getTopicDetail: topic %d not found", id)
+	}
+ 
+	// 2. Feeds linked to this topic.
+	rssItems, err := reader.GetRssByTopic(id)
+	if err != nil {
+		return dto.TopicAllInOne{}, fmt.Errorf("topic service: getTopicDetail: rss for topic %d: %w", id, err)
+	}
+ 
+	// 3. Build RssDetailResponse from the existing shallow RssResponse
+	//    read — no new reader method required.
+	rssDetails := make([]dto.RssDetailResponse, 0, len(rssItems))
+	for _, item := range rssItems {
+		rssResp, err := reader.GetRssByID(item.ID)
+		if err != nil {
+			return dto.TopicAllInOne{}, fmt.Errorf("topic service: getTopicDetail: rss %d: %w", item.ID, err)
+		}
+ 
+		posts := make([]dto.PostDetailResponse, 0, len(rssResp.Posts))
+		for _, p := range rssResp.Posts {
+			posts = append(posts, dto.PostDetailResponse{
+				ID:          p.ID,
+				Title:       p.Title,
+				PublishedAt: p.PublishedAt,
+				Content:     p.Content,
+				// Summary, Slide: intentionally nil — per-post
+				// hydration isn't implemented yet.
+			})
+		}
+ 
+		rssDetails = append(rssDetails, dto.RssDetailResponse{
+			Info:  rssResp.Info,
+			Posts: posts,
+		})
+	}
+ 
+	return dto.TopicAllInOne{
+		TopicID: id,
+		Rss:     rssDetails,
+		// Summary, Slide: intentionally nil — topic-level briefing
+		// generation isn't implemented yet.
+		Summary:   nil,
+		Slide:     nil,
+		CreatedAt: createdAt,
+	}, nil
+}
+

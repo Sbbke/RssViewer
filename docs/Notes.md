@@ -7,7 +7,7 @@ When pull the actual content of the post, the result is in their own html file, 
 
 
 ## DTO
-The dto design start with using samll objecy with only id reference and title, besides from the benefit of small initial payload and lazy loading, it allows the adaptability if the hydrated version need to be adopt in the future.
+The dto design start with using samll object with only id reference and title, besides from the benefit of small initial payload and lazy loading, it allows the adaptability if the hydrated version need to be adopt in the future.
 
 
 ## Architectural Refinement: Separation by Data Characteristics

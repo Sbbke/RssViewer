@@ -63,6 +63,10 @@ func (a *App) GetTopics() ([]dto.TopicResponse, error) {
 	return topics, nil
 }
 
+func (a *App) GetTopicDetail(topicID int64) (dto.TopicAllInOne, error) {
+	return a.topicService.GetTopicDetail(topicID)
+
+}
 // GetTopic returns a single topic (with its RSS feeds) by ID.
 func (a *App) GetTopic(topicID int64) (dto.TopicResponse, error) {
 	return a.topicService.GetTopicResponse(topicID)

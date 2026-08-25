@@ -28,12 +28,28 @@
 
 .main-content {
     flex: 1;
+    min-width: 0;
     padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    /* Was justify-content: center with no scroll — fine for the short
+       logo placeholder, but clips anything taller than the viewport
+       (e.g. TopicPage's post list). .main-placeholder below handles
+       its own vertical centering now that this container doesn't. */
+    justify-content: flex-start;
+    overflow-y: auto;
+    transition: margin-left var(--transition-slow);
+}
+
+.main-placeholder {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: margin-left var(--transition-slow);
+    min-height: 100%;
+    width: 100%;
 }
 
 /* ---- Result line ---- */

@@ -30,6 +30,10 @@ export function GetTopic(arg1) {
   return window['go']['main']['App']['GetTopic'](arg1);
 }
 
+export function GetTopicDetail(arg1) {
+  return window['go']['main']['App']['GetTopicDetail'](arg1);
+}
+
 export function GetTopics() {
   return window['go']['main']['App']['GetTopics']();
 }

@@ -68,11 +68,7 @@ function TopicContent({ topicId, topicName }: TopicContentProps) {
     if (selectedRss) {
         return (
             <div className="topic-content">
-                <div className="topic-content-header">
-                    <button className="back-btn" onClick={() => setSelectedRss(null)}>
-                        ← Back to {topicName}
-                    </button>
-                </div>
+
                 <RssContent
                     rssId={selectedRss.id}
                     rssTitle={selectedRss.title}

@@ -94,7 +94,6 @@ function RssContent({ rssId, rssTitle, onSelectPost, onBack }: RssContentProps) 
                 <button className="back-btn" onClick={onBack} aria-label="Back to main page">
                     ← Back
                 </button>
-                <h2>{rssTitle}</h2>
                 <button
                     className="refresh-btn"
                     onClick={handleCheckUpdate}
@@ -110,6 +109,8 @@ function RssContent({ rssId, rssTitle, onSelectPost, onBack }: RssContentProps) 
                     )}
                 </button>
             </div>
+             <h2>{rssTitle}</h2>
+
             <p className="rss-content-meta">
                 {posts.length} {posts.length === 1 ? 'post' : 'posts'}
             </p>

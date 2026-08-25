@@ -16,6 +16,8 @@ export function GetStandaloneRss():Promise<Array<dto.RssItem>>;
 
 export function GetTopic(arg1:number):Promise<dto.TopicResponse>;
 
+export function GetTopicDetail(arg1:number):Promise<dto.TopicAllInOne>;
+
 export function GetTopics():Promise<Array<dto.TopicResponse>>;
 
 export function Greet(arg1:string):Promise<string>;

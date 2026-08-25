@@ -9,13 +9,32 @@
 .topic-content-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: var(--space-6);
     margin-bottom: var(--space-7);
 }
 
 .topic-content-header h2 {
+    flex: 1;
+    min-width: 0;
     margin: 0;
+    font-size: var(--font-size-xl);
+    font-weight: 700;
     color: var(--text-heading);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Scoped override — .rss-add-btn is defined in sidebar.css as a
+   full-width (width: 100%) block button for the sidebar's
+   "Add standalone RSS" section. Reused here in a header row, it
+   needs to size to its content instead of stretching the row.
+   Scoping the override to .topic-content-header keeps the
+   sidebar's own usage of .rss-add-btn untouched. */
+.topic-content-header .rss-add-btn {
+    width: auto;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .topic-content-loading,
@@ -24,11 +43,18 @@
     padding: var(--space-7) 0;
 }
 
+.topic-content-empty {
+    text-align: center;
+    border: 1px dashed rgba(212, 175, 55, 0.2);
+    border-radius: var(--radius-lg);
+    padding: var(--space-9);
+}
+
 .topic-content-feed-list {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--space-3);
 }
