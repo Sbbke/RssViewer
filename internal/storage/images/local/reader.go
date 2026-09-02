@@ -9,17 +9,6 @@ import (
 	"strconv"
 	"strings"
 )
-
-type BriefingMeta struct {
-	Hash        string  `json:"hash"`
-	Timeframe   string  `json:"timeframe"`   // "weekly", "monthly", "custom"
-	PeriodStart string  `json:"periodStart"`
-	PeriodEnd   string  `json:"periodEnd"`
-	RssIDs      []int64 `json:"rssIds"`
-	NumSlides   int     `json:"numSlides"`
-	CreatedAt   string  `json:"createdAt"`
-}
-
 type LocalReader struct {
 	basePath string
 }
@@ -87,18 +76,22 @@ func (r *LocalReader) GetPostMeta(ID int64) ([]BriefingMeta, error){
 }
 
 
-func (r *LocalReader) readBriefingMeta(dirPath string) ([]BriefingMeta, error) {
-	var res []BriefingMeta
-
-	data, err := os.ReadFile(dirPath)
+func (r *LocalReader) readBriefingMeta(metaPath string) ([]BriefingMeta, error) {
+	data, err := os.ReadFile(metaPath)
 	if err != nil {
-		return nil, fmt.Errorf("read file failed: %w", err)
+		return nil, fmt.Errorf("failed to read meta.json at %s: %w", metaPath, err)
 	}
-
+	var res []BriefingMeta
 	if err := json.Unmarshal(data, &res); err != nil {
-		return nil, fmt.Errorf("unmarshal json failed: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal meta.json at %s: %w", metaPath, err)
 	}
-
+	seen := make(map[string]bool, len(res))
+	for _, b := range res {
+		if seen[b.Hash] {
+			return nil, fmt.Errorf("duplicate briefing hash %q in %s", b.Hash, metaPath)
+		}
+		seen[b.Hash] = true
+	}
 	return res, nil
 }
 

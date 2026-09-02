@@ -1,6 +1,7 @@
 package images
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -62,25 +63,30 @@ func (w *LocalWriter) CreatePostSummary(ID int64, content string) error {
 	return nil
 }
 
-func (w *LocalWriter) CreatePostSlide(ID int64, images [][]byte) error {
-	folder := strconv.FormatInt(ID, 10)
-	targetDir := filepath.Join(w.Path, "summary", "post", folder, "slide")
 
-	if err := w.checkDirExist(targetDir); err != nil {
+
+func (w *LocalWriter) CreatePostSlide(postID int64, meta BriefingMeta, images [][]byte) error {
+	if !validHash(meta.Hash) {
+		return fmt.Errorf("invalid briefing hash %q", meta.Hash)
+	}
+	meta.NumSlides = len(images)
+
+	postDir := filepath.Join(w.Path, "summary", "post", strconv.FormatInt(postID, 10))
+	slideDir := filepath.Join(postDir, "slide_"+meta.Hash)
+
+	if err := w.checkDirExist(slideDir); err != nil {
 		return err
 	}
-
 	for i, img := range images {
-
-		fp := filepath.Join(targetDir, fmt.Sprintf("%d.png", i))
-
+		fp := filepath.Join(slideDir, fmt.Sprintf("%d.png", i))
 		if err := os.WriteFile(fp, img, 0644); err != nil {
 			return fmt.Errorf("error saving image to: %s, %w", fp, err)
 		}
 	}
-	return nil
-}
 
+	metaPath := filepath.Join(postDir, "meta.json")
+	return w.upsertBriefingMeta(metaPath, meta, false)
+}
 func (w *LocalWriter) CreateTopicSummary(ID int64, rssHash string, content string) error {
 
 	topicDirName := fmt.Sprintf("%d_%s", ID, rssHash)
@@ -98,27 +104,29 @@ func (w *LocalWriter) CreateTopicSummary(ID int64, rssHash string, content strin
 	return nil
 }
 
-func (w *LocalWriter) CreateTopicSlide(ID int64, rssHash string, images [][]byte) error {
+func (w *LocalWriter) CreateTopicSlide(topicID int64, meta BriefingMeta, images [][]byte) error {
+	if !validHash(meta.Hash) {
+		return fmt.Errorf("invalid briefing hash %q", meta.Hash)
+	}
+	meta.NumSlides = len(images)
 
-	topicDirName := fmt.Sprintf("%d_%s", ID, rssHash)
-	targetDir := filepath.Join(w.Path, "summary", "topic", topicDirName, "slide")
+	topicDir := filepath.Join(w.Path, "summary", "topic", strconv.FormatInt(topicID, 10))
+	slideDir := filepath.Join(topicDir, "slide_"+meta.Hash)
 
-	if err := w.checkDirExist(targetDir); err != nil {
+	if err := w.checkDirExist(slideDir); err != nil {
 		return err
 	}
-
 	for i, img := range images {
-
-		fp := filepath.Join(targetDir, fmt.Sprintf("%d.png", i))
-
+		fp := filepath.Join(slideDir, fmt.Sprintf("%d.png", i))
 		if err := os.WriteFile(fp, img, 0644); err != nil {
 			return fmt.Errorf("error saving image to: %s, %w", fp, err)
 		}
 	}
-	return nil
+
+	metaPath := filepath.Join(topicDir, "meta.json")
+	return w.upsertBriefingMeta(metaPath, meta, false /* mustExist */)
 }
 
-// Update() implementation
 // first atomicWrite() endpoitn, then Create()
 func (w *LocalWriter) UpdateRss(ID int64, content string) error {
 
@@ -151,24 +159,38 @@ func (w *LocalWriter) UpdateTopicSummary(ID int64, rssHash string, content strin
 	return nil
 }
 
-func (w *LocalWriter) UpdatePostSlide(ID int64, images [][]byte) error {
-	folder := strconv.FormatInt(ID, 10)
-	finalDir := filepath.Join(w.Path, "summary", "post", folder, "slide")
-	if err := w.atomicDirSwap(finalDir, images); err != nil {
+func (w *LocalWriter) UpdatePostSlide(postID int64, meta BriefingMeta, images [][]byte) error {
+	if !validHash(meta.Hash) {
+		return fmt.Errorf("invalid briefing hash %q", meta.Hash)
+	}
+	meta.NumSlides = len(images)
+
+	postDir := filepath.Join(w.Path, "summary", "post", strconv.FormatInt(postID, 10))
+	slideDir := filepath.Join(postDir, "slide_"+meta.Hash)
+
+	if err := w.atomicDirSwap(slideDir, images); err != nil {
 		return err
 	}
-	return nil
+	metaPath := filepath.Join(postDir, "meta.json")
+	return w.upsertBriefingMeta(metaPath, meta, true)
 }
 
-func (w *LocalWriter) UpdateTopicSlide(ID int64, rssHash string, images [][]byte) error {
+func (w *LocalWriter) UpdateTopicSlide(topicID int64, meta BriefingMeta, images [][]byte) error {
+	if !validHash(meta.Hash) {
+		return fmt.Errorf("invalid briefing hash %q", meta.Hash)
+	}
+	meta.NumSlides = len(images)
 
-	topicDirName := fmt.Sprintf("%d_%s", ID, rssHash)
-	targetDir := filepath.Join(w.Path, "summary", "topic", topicDirName, "slide")
-	if err := w.atomicDirSwap(targetDir, images); err != nil {
+	topicDir := filepath.Join(w.Path, "summary", "topic", strconv.FormatInt(topicID, 10))
+	slideDir := filepath.Join(topicDir, "slide_"+meta.Hash)
+
+	if err := w.atomicDirSwap(slideDir, images); err != nil {
 		return err
 	}
-	return nil
+	metaPath := filepath.Join(topicDir, "meta.json")
+	return w.upsertBriefingMeta(metaPath, meta, true /* mustExist */)
 }
+
 
 // Delete() implementation
 func (w *LocalWriter) DeleteRss(ID int64) error {
@@ -183,11 +205,6 @@ func (w *LocalWriter) DeletePostSummary(ID int64) error {
 	return w.removePath(target)
 }
 
-func (w *LocalWriter) DeletePostSlide(ID int64) error {
-	folder := strconv.FormatInt(ID, 10)
-	target := filepath.Join(w.Path, "summary", "post", folder, "slide")
-	return w.removePath(target)
-}
 
 func (w *LocalWriter) DeleteTopicSummary(ID int64, rssHash string) error {
 	topicDirName := fmt.Sprintf("%d_%s", ID, rssHash)
@@ -195,11 +212,28 @@ func (w *LocalWriter) DeleteTopicSummary(ID int64, rssHash string) error {
 	return w.removePath(target)
 }
 
-func (w *LocalWriter) DeleteTopicSlide(ID int64, rssHash string) error {
-	topicDirName := fmt.Sprintf("%d_%s", ID, rssHash)
-	target := filepath.Join(w.Path, "summary", "topic", topicDirName, "slide")
-	return w.removePath(target)
+func (w *LocalWriter) DeleteTopicSlide(topicID int64, hash string) error {
+	if !validHash(hash) {
+		return fmt.Errorf("invalid composition hash %q", hash)
+	}
+	topicDir := filepath.Join(w.Path, "summary", "topic", strconv.FormatInt(topicID, 10))
+	if err := w.removePath(filepath.Join(topicDir, "slide_"+hash)); err != nil {
+		return err
+	}
+	return w.removeBriefingMeta(filepath.Join(topicDir, "meta.json"), hash)
 }
+
+func (w *LocalWriter) DeletePostSlide(postID int64, hash string) error {
+	if !validHash(hash) {
+		return fmt.Errorf("invalid composition hash %q", hash)
+	}
+	postDir := filepath.Join(w.Path, "summary", "post", strconv.FormatInt(postID, 10))
+	if err := w.removePath(filepath.Join(postDir, "slide_"+hash)); err != nil {
+		return err
+	}
+	return w.removeBriefingMeta(filepath.Join(postDir, "meta.json"), hash)
+}
+
 
 // Helper wrapper to safely isolate and remove file artifacts
 func (w *LocalWriter) removePath(path string) error {
@@ -310,4 +344,64 @@ func (w *LocalWriter) atomicDirSwap(path string, images [][]byte) error {
 	swapped = true
 	return nil
 
+}
+func (w *LocalWriter) upsertBriefingMeta(metaPath string, entry BriefingMeta, mustExist bool) error {
+	list, err := readBriefingMetaListAllowMissing(metaPath)
+	if err != nil {
+		return err
+	}
+
+	found := false
+	for i, b := range list {
+		if b.Hash == entry.Hash {
+			list[i] = entry
+			found = true
+			break
+		}
+	}
+	if !found {
+		if mustExist {
+			return fmt.Errorf("no existing briefing with hash %q to update in %s", entry.Hash, metaPath)
+		}
+		list = append(list, entry)
+	}
+
+	data, err := json.MarshalIndent(list, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal meta.json for %s: %w", metaPath, err)
+	}
+	return w.atomicWrite(metaPath, data)
+}
+
+func (w *LocalWriter) removeBriefingMeta(metaPath string, hash string) error {
+	list, err := readBriefingMetaListAllowMissing(metaPath)
+	if err != nil {
+		return err
+	}
+	out := list[:0]
+	for _, b := range list {
+		if b.Hash != hash {
+			out = append(out, b)
+		}
+	}
+	data, err := json.MarshalIndent(out, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal meta.json for %s: %w", metaPath, err)
+	}
+	return w.atomicWrite(metaPath, data)
+}
+
+func readBriefingMetaListAllowMissing(metaPath string) ([]BriefingMeta, error) {
+	data, err := os.ReadFile(metaPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return []BriefingMeta{}, nil
+		}
+		return nil, fmt.Errorf("failed to read meta.json at %s: %w", metaPath, err)
+	}
+	var list []BriefingMeta
+	if err := json.Unmarshal(data, &list); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal meta.json at %s: %w", metaPath, err)
+	}
+	return list, nil
 }

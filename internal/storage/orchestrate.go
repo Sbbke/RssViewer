@@ -468,23 +468,20 @@ func (do *DataOrch) executeInternalMutation(task WriteTask) (dto.MutationResult,
 		if !ok {
 			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		return dto.MutationResult{}, do.localWriter.CreatePostSlide(p.PostID, p.Slide)
+		return dto.MutationResult{}, do.localWriter.CreatePostSlide(p.PostID, p.Meta, p.Slide)
 		// -----------------------------------------------------------------------
 	case TaskUpdatePostSlide:
 		p, ok := task.Payload.(dto.PostSlidePayload)
 		if !ok {
 			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		return dto.MutationResult{}, do.localWriter.UpdatePostSlide(p.PostID, p.Slide)
-
-
+		return dto.MutationResult{}, do.localWriter.UpdatePostSlide(p.PostID, p.Meta, p.Slide)
 	case TaskDeletePostSlide:
-		id, ok := task.Payload.(int64)
+		p, ok := task.Payload.(dto.SlideDeletePayload)
 		if !ok {
 			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		return dto.MutationResult{}, do.localWriter.DeletePostSlide(id)
-
+	return dto.MutationResult{}, do.localWriter.DeletePostSlide(p.ID, p.Hash)
 
 
 	case TaskCreateTopicSummary:
@@ -519,24 +516,19 @@ func (do *DataOrch) executeInternalMutation(task WriteTask) (dto.MutationResult,
 		if !ok {
 			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		return dto.MutationResult{}, do.localWriter.CreateTopicSlide(p.TopicID,p.RssHash, p.Slide)
-
+		return dto.MutationResult{}, do.localWriter.CreateTopicSlide(p.TopicID, p.Meta, p.Slide)
 	case TaskUpdateTopicSlide:
 		p, ok := task.Payload.(dto.TopicSlidePayload)
 		if !ok {
 			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		return dto.MutationResult{}, do.localWriter.UpdateTopicSlide(p.TopicID, p.RssHash, p.Slide)
-
-
-
+		return dto.MutationResult{}, do.localWriter.UpdateTopicSlide(p.TopicID, p.Meta, p.Slide)
 	case TaskDeleteTopicSlide:
-		p, ok := task.Payload.(dto.TopicSlidePayload)
+		p, ok := task.Payload.(dto.SlideDeletePayload)
 		if !ok {
 			return dto.MutationResult{}, unexpectedPayload(task)
 		}
-		return dto.MutationResult{}, do.localWriter.DeleteTopicSlide(p.TopicID, p.RssHash)
-
+	return dto.MutationResult{}, do.localWriter.DeleteTopicSlide(p.ID, p.Hash)
 
 	case TaskDeleteRss:
 		id, ok := task.Payload.(int64)

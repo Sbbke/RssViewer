@@ -1,6 +1,9 @@
 package dto
 
-import "time"
+import (
+	images "RssViewer/internal/storage/images/local"
+	"time"
+)
 
 type BriefingSlideResponse struct {
 	Slides    [][]byte `json:"slides"` // image slides
@@ -80,9 +83,22 @@ type TopicPayload struct {
 }
 
 type TopicSlidePayload struct {
-	TopicID int64    `json:"topicId"`
-	Slide   [][]byte `json:"slide"`
-	RssHash string   `json:"rssHash"`
+	TopicID int64            `json:"topicId"`
+	Slide   [][]byte         `json:"slide"`
+	Meta    images.BriefingMeta `json:"meta"`
+}
+
+type PostSlidePayload struct {
+	PostID int64            `json:"postId"`
+	Slide  [][]byte         `json:"slide"`
+	Meta   images.BriefingMeta `json:"meta"`
+}
+
+// SlideDeletePayload identifies one specific briefing (topic or post) to
+// remove — a bare ID is no longer enough since slides are keyed by hash.
+type SlideDeletePayload struct {
+	ID   int64  `json:"id"`
+	Hash string `json:"hash"`
 }
 
 type RssPayload struct {
@@ -104,10 +120,7 @@ type PostPayload struct {
 	PublishedAt string `json:"publishedAt"`
 }
 
-type PostSlidePayload struct {
-	PostID int64    `json:"postId"`
-	Slide  [][]byte `json:"slide"`
-}
+
 
 type MutationResult struct {
 	GeneratedID int64  `json:"generatedId"`
