@@ -9,17 +9,23 @@ Frontend communicate with backend through Service Layer, then Service Layer inte
 ### Local Storage  
 - **Summary** <br>
 Only have images slide. The summary is now saved inside db.
+The meta data of the briefing slide is saved along with slides images in local path. The json data contains: 
+1. created time
+2. Num of slides
+
 
 ```bash
 ── summary/
     ├── topic/
-    │   └── {topic_id}_{composite_rss_hash}/
-    │       └── slide/
+    │   └── {topic_id}/
+            └── meta.json
+    │       └── slide_{hash}/
     │           ├── 1.png
     │           └── 2.png
     └── post/
         └── {post_id}/
-            └── slide/
+            └── meta.json
+            └── slide_{hash}/
                 ├── 1.png
                 └── 2.png
 ```
@@ -68,8 +74,8 @@ CreatedAt
 Represents generated slide assets.
 
 ```go
-Slides []string
-CreatedAt
+Slides [][]byte
+CreatedAt string
 ```
 
 ### TopicResponse
@@ -532,17 +538,6 @@ Responsible for Create / Update / Delete operations.
 
 Large assets are stored on disk instead of SQLite.
 
-```
-
-
-summary/
-    post/{postID}.txt
-    topic/{topicID}.txt
-
-slides/
-    post/{postID}/
-    topic/{topicID}/
-```
 
 Update operations should use atomic replacement:
 
