@@ -17,6 +17,7 @@ type App struct {
 	orch         *storage.DataOrch
 	topicService *service.TopicService
 	rssService *service.RssService
+	briefingService *service.BriefingService
 	storagePath string
 }
 
@@ -33,6 +34,7 @@ func (a *App) startup(ctx context.Context) {
 	a.orch = setupOrch()
 	a.topicService = service.NewTopicService(a.orch)
 	a.rssService = service.NewRssService(a.orch)
+	a.briefingService = service.NewBriefingService((a.orch))
 
 }
 
@@ -113,6 +115,7 @@ func (a *App) GetRssDetail(rssID int64) (dto.RssResponse, error) {
 func (a *App) GetStandaloneRss() ([]dto.RssItem, error) {
 	return a.rssService.GetStandaloneRss()
 }
+
 func setupOrch() *storage.DataOrch {
 	if err := os.MkdirAll("temp", 0755); err != nil {
 		log.Fatalf("error creating temp dir: %v", err)

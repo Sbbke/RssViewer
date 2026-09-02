@@ -1,0 +1,26 @@
+
+
+.rss-row-item{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-6) 1.25rem;
+    background: var(--bg-surface-strong);
+    border: 1px solid var(--border-soft);
+    border-left: 3px solid transparent;
+    border-radius: var(--radius-lg);
+    transition:
+        transform var(--transition-fast),
+        border-color var(--transition-fast),
+        background var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+.rss-row-item:hover {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: var(--border);
+    border-left-color: var(--gold);
+    transform: translateX(2px);
+    box-shadow: var(--shadow-card-hover);
+}
+

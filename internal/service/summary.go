@@ -33,22 +33,18 @@ func (s *BriefingService) GetLatestBriefingByTopic(
 
 	if err := validateID(topicID, "topicID"); err != nil {
 		return nil, err
-	}
+	} 
 
-	dr := s.orch.GetReader()
 	reader := s.orch.GetLocalReader()
 	if reader == nil {
 		return nil, fmt.Errorf("database reader is not available")
 	}
 	
-	tr, err := dr.GetTopicWithRss(topicID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get topic %d: %w", topicID, err)
-	}
+
 	// [][]byte
 	slide, err := reader.ReadTopicSlide(topicID, "")
 	if err != nil{
-		return nil, fmt.Errorf("Failed to get slide for %s",tr.Name)
+		return nil, fmt.Errorf("Failed to get slide f")
 	}
 	result := dto.BriefingSlideResponse{
 		Slides: slide,
@@ -102,7 +98,8 @@ func (s *BriefingService) GenerateBriefing(
 func (s *BriefingService) GetBriefingByTopic(
 	ctx context.Context,
 	topicID int64,
-) (*dto.TopicResponse, error) {
+	rssID []int64,
+) (*dto.BriefingSlideResponse, error) {
 	if err := validateContext(ctx); err != nil {
 		return nil, err
 	}
@@ -110,15 +107,21 @@ func (s *BriefingService) GetBriefingByTopic(
 	if err := validateID(topicID, "topicID"); err != nil {
 		return nil, err
 	}
-
-	reader := s.orch.GetReader()
+	
+	for id := range rssID {
+		if err := validateID(int64(id), "rssID"); err != nil{
+			return nil, err
+		}
+	}
+	reader := s.orch.GetLocalReader()
 	if reader == nil {
 		return nil, fmt.Errorf("database reader is not available")
 	}
-
-	topic, err := reader.GetTopicWithRss(topicID)
+	// cal rssHash
+	rssHash := ""	
+	slides, err := reader.ReadTopicSlide(topicID, rssHash)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get topic %d: %w", topicID, err)
+		return nil, err
 	}
 
 	// The TopicResponse can be returned directly for the SQL-backed
@@ -129,7 +132,10 @@ func (s *BriefingService) GetBriefingByTopic(
 	//     ReadTopicSummary(topicID, rssHash)
 	//
 	// and rssHash is not exposed by DBReader.
-	return &topic, nil
+	res := dto.BriefingSlideResponse{
+		Slides: slides,
+	}
+	return &res, nil
 }
 
 // GetBriefingByPost retrieves a Post together with its generated

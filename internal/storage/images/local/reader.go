@@ -1,6 +1,7 @@
 package images
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -8,6 +9,16 @@ import (
 	"strconv"
 	"strings"
 )
+
+type BriefingMeta struct {
+	Hash        string  `json:"hash"`
+	Timeframe   string  `json:"timeframe"`   // "weekly", "monthly", "custom"
+	PeriodStart string  `json:"periodStart"`
+	PeriodEnd   string  `json:"periodEnd"`
+	RssIDs      []int64 `json:"rssIds"`
+	NumSlides   int     `json:"numSlides"`
+	CreatedAt   string  `json:"createdAt"`
+}
 
 type LocalReader struct {
 	basePath string
@@ -38,11 +49,17 @@ func (r *LocalReader) ReadTopicSummary(ID int64, rssHash string) (string, error)
 	return string(data), nil
 
 }
+
 func (r *LocalReader) ReadTopicSlide(ID int64, rssHash string) ([][]byte, error) {
 	topicDirName := fmt.Sprintf("%d_%s", ID, rssHash)
 	slideDir := filepath.Join(r.basePath, "summary", "topic", topicDirName, "slide")
 
 	return r.readOrderedImagesFromDir(slideDir)
+}
+
+func (r *LocalReader) GetTopicSlideMeta(ID int64) ([]BriefingMeta, error){
+	metaPath := filepath.Join(r.basePath, "summary", "topic", fmt.Sprintf("%d", ID), "meta.json")
+	return r.readBriefingMeta(metaPath)
 }
 
 func (r *LocalReader) ReadPostSummary(ID int64) (string, error) {
@@ -60,6 +77,29 @@ func (r *LocalReader) ReadPostSlide(ID int64) ([][]byte, error) {
 	slideDir := filepath.Join(r.basePath, "summary", "post", fmt.Sprintf("%d", ID), "slide")
 
 	return r.readOrderedImagesFromDir(slideDir)
+}
+
+
+
+func (r *LocalReader) GetPostMeta(ID int64) ([]BriefingMeta, error){
+	metaPath := filepath.Join(r.basePath, "summary", "post", fmt.Sprintf("%d", ID),"meta.json")
+	return r.readBriefingMeta(metaPath)
+}
+
+
+func (r *LocalReader) readBriefingMeta(dirPath string) ([]BriefingMeta, error) {
+	var res []BriefingMeta
+
+	data, err := os.ReadFile(dirPath)
+	if err != nil {
+		return nil, fmt.Errorf("read file failed: %w", err)
+	}
+
+	if err := json.Unmarshal(data, &res); err != nil {
+		return nil, fmt.Errorf("unmarshal json failed: %w", err)
+	}
+
+	return res, nil
 }
 
 func (r *LocalReader) readOrderedImagesFromDir(dirPath string) ([][]byte, error) {

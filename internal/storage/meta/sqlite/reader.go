@@ -354,6 +354,8 @@ func (r *DBReader) GetPostsByRssInWindow(rssID int64, from, to time.Time) ([]dto
 	return posts, nil
 }
 
+
+
 // ---------------------------------------------------------------------------
 // Private scanners
 //

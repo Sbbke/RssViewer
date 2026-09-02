@@ -1,3 +1,4 @@
+import './rss_row.css';
 interface RssRowProps {
     title: string;
     onRemove: () => void;

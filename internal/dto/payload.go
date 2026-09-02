@@ -11,7 +11,6 @@ type BriefingTextResponse struct {
 	Body      string `json:"body"`
 	CreatedAt string `json:"createdAt"`
 }
-
 type TopicAllInOne struct {
 	TopicID   int64                  `json:"topicId"`
 	Rss       []RssDetailResponse    `json:"rss"`
